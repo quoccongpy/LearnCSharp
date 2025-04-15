@@ -1,0 +1,31 @@
+﻿using LearnCSharp.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace LearnCSharp.Infrastructure.Persistence.Configurations
+{
+    public class OrderConfiguration : IEntityTypeConfiguration<Order>
+    {
+        public void Configure(EntityTypeBuilder<Order> builder)
+        {
+            builder.ToTable("order");
+            builder.HasKey(a => a.Id);
+            builder.Property(a => a.Id).HasColumnName("id");
+            builder.Property(a => a.UserId).HasColumnName("user_id").HasColumnType("uuid");
+            builder.Property(a => a.FullName).HasColumnName("FullName").HasColumnType("TEXT");
+            builder.Property(a => a.Email).HasColumnName("Email").HasColumnType("TEXT");
+            builder.Property(a => a.PhoneNumber).HasColumnName("PhoneNumber").HasColumnType("TEXT");
+            builder.Property(a => a.Address).HasColumnName("Address").HasColumnType("TEXT");
+            builder.Property(a => a.Note).HasColumnName("note").HasMaxLength(100);
+            builder.Property(a => a.OrderDate).HasColumnName("ordate_date").HasColumnType("TIMESTAMP").IsRequired(false);
+            builder.Property(a => a.Status).HasColumnName("status").HasConversion<string>();
+            builder.Property(a => a.TotalMoney).HasColumnName("total_money");
+            builder.Property(a => a.ShippingMethod).HasColumnName("shipping_method").HasMaxLength(100);
+            builder.Property(a => a.ShippingAddress).HasColumnName("shipping_address").HasMaxLength(200);
+            builder.Property(a => a.ShippingDate).HasColumnName("shipping_date").HasColumnType("TIMESTAMP");
+            builder.Property(a => a.TrackingNumber).HasColumnName("tracking_number").HasMaxLength(100);
+            builder.Property(a => a.PaymentMethod).HasColumnName("payment_method").HasMaxLength(100);
+            builder.Property(a => a.IsActive).HasColumnName("is_active");
+        }
+    }
+}
