@@ -4,6 +4,7 @@ using LearnCSharp.Application.Models.DTOs.Product;
 using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
 using System.Linq.Expressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LearnCSharp.Application.Services
 {
@@ -11,11 +12,13 @@ namespace LearnCSharp.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IImageService _imageService;
+        private readonly IProductImageService _productImageService;
 
-        public ProductService(IUnitOfWork unitOfWork, IImageService imageService)
+        public ProductService(IUnitOfWork unitOfWork, IImageService imageService, IProductImageService productImageService)
         {
             _unitOfWork = unitOfWork;
             _imageService = imageService;
+            _productImageService = productImageService;
         }
 
         public async Task CreateAsync(ProductCreateDTO model)
@@ -35,10 +38,25 @@ namespace LearnCSharp.Application.Services
                     Thumbnaill = imagePath,
                     Description = model.Description,
                     CategoryId = model.CategoryId,
-                    CreatedDate=DateTime.Now,
+                    CreatedDate = DateTime.Now,
                 };
                 await _unitOfWork.Product.CreateAsync(data);
                 await _unitOfWork.CompleteAsync();
+
+                if (model.Image != null && model.Image.Count > 0)
+                {
+                    var imagePaths = await _imageService.UploadMultipleImageAsync(model.Image);
+                    var dataProductImage = imagePath.Select(a => new ProductImage()
+                    {
+                        ProductId = data.Id,
+                        ImageUrl = imagePath,
+                    }).ToList();
+                    foreach (var item in dataProductImage)
+                    {
+                        await _unitOfWork.ProductImage.CreateAsync(item);
+                    }
+                    await _unitOfWork.CompleteAsync();
+                }
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch (Exception ex)
@@ -48,7 +66,7 @@ namespace LearnCSharp.Application.Services
             }
         }
 
-        public async Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex=1 , int pageSize = 10)
+        public async Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10)
         {
             Expression<Func<Product, bool>> filter = null;
             if (!string.IsNullOrEmpty(keyword))
@@ -92,29 +110,49 @@ namespace LearnCSharp.Application.Services
 
         public async Task Update(int id, ProductUpdateDTO model)
         {
-            var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
-            if (product == null)
-            {
-                throw new InvalidOperationException($"Product with ID {id} not found.");
-            }
-            product.Name = model.Name ?? product.Name;
-            product.Price = model.Price > 0 ? model.Price.Value : product.Price;
-            product.Description = model.Description ?? product.Description;
-            product.CategoryId = model.CategoryId ?? product.CategoryId;
-            product.UpdatedDate = DateTime.Now;
-            if (model.Thumbnaill != null)
-            {
-                if (!string.IsNullOrEmpty(product.Thumbnaill))
-                {
-                    _imageService.DeleteImage(product.Thumbnaill);
-                }
-                product.Thumbnaill = await _imageService.UploadImageAsync(model.Thumbnaill);
-            }
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
+                var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+                if (product == null)
+                {
+                    throw new InvalidOperationException($"Product with ID {id} not found.");
+                }
+                product.Name = model.Name ?? product.Name;
+                product.Price = model.Price > 0 ? model.Price.Value : product.Price;
+                product.Description = model.Description ?? product.Description;
+                product.CategoryId = model.CategoryId ?? product.CategoryId;
+                product.UpdatedDate = DateTime.Now;
+                if (model.Thumbnaill != null)
+                {
+                    if (!string.IsNullOrEmpty(product.Thumbnaill))
+                    {
+                        _imageService.DeleteImage(product.Thumbnaill);
+                    }
+                    product.Thumbnaill = await _imageService.UploadImageAsync(model.Thumbnaill);
+                }
                 _unitOfWork.Product.Update(product);
                 await _unitOfWork.CompleteAsync();
+
+                if(model.Image != null && model.Image.Count > 0) 
+                {
+                    var currentImages = await _productImageService.GetListProductImageByIdAsync(id);
+                    foreach(var image in currentImages)
+                    {
+                        _imageService.DeleteImage(image.ImageUrl);
+                        await _productImageService.DeleteAsync(image.Id);
+                    }
+                    var imagePaths = await _imageService.UploadMultipleImageAsync(model.Image);
+                    foreach(var path in imagePaths)
+                    {
+                        var dataProductImage = new ProductImage()
+                        {
+                            ProductId = id,
+                            ImageUrl = path,
+                        };
+                        await _unitOfWork.ProductImage.CreateAsync(dataProductImage);
+                    }
+                }
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch

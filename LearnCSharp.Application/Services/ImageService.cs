@@ -34,6 +34,18 @@ namespace LearnCSharp.Application.Services
             }
         }
 
+        public void DeleteMultipleImage(IList<string> imagePath)
+        {
+            if (imagePath == null || imagePath.Any())
+            {
+                return;
+            }
+            foreach (var path in imagePath)
+            {
+                DeleteImage(path);
+            }
+        }
+
         public async Task<string> UploadImageAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -62,6 +74,29 @@ namespace LearnCSharp.Application.Services
                 await file.CopyToAsync(stream);
             }
             return $"/images/product/{fileName}";
+        }
+
+        public async Task<List<string>> UploadMultipleImageAsync(IList<IFormFile> files)
+        {
+            if (files == null || files.Count == 0)
+            {
+                return new List<string>();
+            }
+            var uploadPath = new List<string>();
+            foreach (var file in files)
+            {
+                try
+                {
+                    string path = await UploadImageAsync(file);
+                    uploadPath.Add(path);
+                }
+                catch (Exception ex)
+                {
+                    DeleteMultipleImage(uploadPath);
+                    throw new Exception(ex.Message);
+                }
+            }
+            return uploadPath;
         }
     }
 }

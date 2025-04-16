@@ -14,9 +14,13 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             _context = context;
             Category = new CategoryRepository(context);
             Product = new ProductRepository(context);
+            ProductImage = new ProductImageRepository(context);
         }
+
         public ICategoryRepository Category { get; private set; }
         public IProductRepository Product { get; private set; }
+        public IProductImageRepository ProductImage { get; private set; }
+
         public async Task BeginTransactionAsync()
         {
             _transaction = await _context.Database.BeginTransactionAsync();
