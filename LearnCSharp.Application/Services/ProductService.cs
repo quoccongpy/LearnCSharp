@@ -35,10 +35,25 @@ namespace LearnCSharp.Application.Services
                     Thumbnaill = imagePath,
                     Description = model.Description,
                     CategoryId = model.CategoryId,
-                    CreatedDate=DateTime.Now,
+                    CreatedDate = DateTime.Now,
                 };
                 await _unitOfWork.Product.CreateAsync(data);
                 await _unitOfWork.CompleteAsync();
+
+                if (model.Image != null && model.Image.Count > 0)
+                {
+                    var imagePaths = await _imageService.UploadMultipleImageAsync(model.Image);
+                    var dataProductImage = imagePath.Select(a => new ProductImage()
+                    {
+                        ProductId = data.Id,
+                        ImageUrl = imagePath,
+                    }).ToList();
+                    foreach (var item in dataProductImage)
+                    {
+                        await _unitOfWork.ProductImage.CreateAsync(item);
+                    }
+                    await _unitOfWork.CompleteAsync();
+                }
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch (Exception ex)
@@ -48,7 +63,7 @@ namespace LearnCSharp.Application.Services
             }
         }
 
-        public async Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex=1 , int pageSize = 10)
+        public async Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10)
         {
             Expression<Func<Product, bool>> filter = null;
             if (!string.IsNullOrEmpty(keyword))

@@ -18,6 +18,7 @@ namespace LearnCSharp.Infrastructure
         public DbSet<OrderDetails> OrderDetails { get; set; }
         public DbSet<Product> Product { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; }
+        public DbSet<ProductImage> ProductImage { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -27,6 +28,7 @@ namespace LearnCSharp.Infrastructure
             builder.ApplyConfiguration(new OrderDetailsConfiguration());
             builder.ApplyConfiguration(new OrderConfiguration());
             builder.ApplyConfiguration(new RefreshTokenConfiguration());
+            builder.ApplyConfiguration(new ProductImageConfiguration());
 
             base.OnModelCreating(builder);
         }
