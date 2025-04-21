@@ -35,6 +35,7 @@ namespace LearnCSharp.Application.Services
             var productImage = await _unitOfWork.ProductImage.GetAllAsync(a => a.ProductId == id);
             var data = productImage.Select(a => new ProductImageDTO()
             {
+                Id=a.Id,
                 ImageUrl = a.ImageUrl,
                 ProductId = a.ProductId,
             }).ToList();
