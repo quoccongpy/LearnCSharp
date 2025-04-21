@@ -11,5 +11,6 @@ namespace LearnCSharp.Application.Models.DTOs.Product
         public DateTime? UpdatedDate { get; set; }
         public int? CategoryId { get; set; }
         public IList<IFormFile>? Image { get; set; }
+        public List<int>? ListRetainIdsImage { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace LearnCSharp.Application.Models.DTOs.Product
+﻿using LearnCSharp.Application.Models.DTOs.ProductImage;
+
+namespace LearnCSharp.Application.Models.DTOs.Product
 {
     public class ProductDTO
     {
@@ -10,5 +12,6 @@
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
         public int CategoryId { get; set; }
+        public List<ProductImageDTO> ProductImagesList { get; set; }
     }
 }

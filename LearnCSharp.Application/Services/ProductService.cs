@@ -96,6 +96,8 @@ namespace LearnCSharp.Application.Services
         public async Task<ProductDTO> GetByIdAsync(int id)
         {
             var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+
+            var dataProductImage = await _productImageService.GetListProductImageByIdAsync(id);
             var data = new ProductDTO()
             {
                 Id = product.Id,
@@ -104,6 +106,7 @@ namespace LearnCSharp.Application.Services
                 Thumbnaill = product.Thumbnaill,
                 Description = product.Description,
                 CategoryId = product.CategoryId,
+                ProductImagesList = dataProductImage.ToList(),
             };
             return data;
         }
@@ -134,23 +137,39 @@ namespace LearnCSharp.Application.Services
                 _unitOfWork.Product.Update(product);
                 await _unitOfWork.CompleteAsync();
 
-                if(model.Image != null && model.Image.Count > 0) 
+                if (model.Image != null && model.Image.Count > 0 || model.ListRetainIdsImage != null)
                 {
                     var currentImages = await _productImageService.GetListProductImageByIdAsync(id);
-                    foreach(var image in currentImages)
+                    var retainIdsImage = model.ListRetainIdsImage ?? new List<int>();
+                    foreach (var image in currentImages)
                     {
-                        _imageService.DeleteImage(image.ImageUrl);
-                        await _productImageService.DeleteAsync(image.Id);
-                    }
-                    var imagePaths = await _imageService.UploadMultipleImageAsync(model.Image);
-                    foreach(var path in imagePaths)
-                    {
-                        var dataProductImage = new ProductImage()
+                        if (!retainIdsImage.Contains(image.Id))
                         {
-                            ProductId = id,
-                            ImageUrl = path,
-                        };
-                        await _unitOfWork.ProductImage.CreateAsync(dataProductImage);
+                            _imageService.DeleteImage(image.ImageUrl);
+                            await _productImageService.DeleteAsync(image.Id);
+                        }
+                    }
+                    if (model.Image != null && model.Image.Count > 0)
+                    {
+                        var uploadedPaths = new List<string>();
+                        try
+                        {
+                            uploadedPaths = await _imageService.UploadMultipleImageAsync(model.Image);
+                            foreach (var path in uploadedPaths)
+                            {
+                                var dataProductImage = new ProductImage()
+                                {
+                                    ProductId = id,
+                                    ImageUrl = path,
+                                };
+                                await _unitOfWork.ProductImage.CreateAsync(dataProductImage);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _imageService.DeleteMultipleImage(uploadedPaths);
+                            throw new Exception($"Error uploading new images: {ex.Message}");
+                        }
                     }
                 }
                 await _unitOfWork.CommitTransactionAsync();

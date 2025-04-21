@@ -36,7 +36,7 @@ namespace LearnCSharp.Application.Services
 
         public void DeleteMultipleImage(IList<string> imagePath)
         {
-            if (imagePath == null || imagePath.Any())
+            if (imagePath == null || !imagePath.Any())
             {
                 return;
             }
