@@ -5,9 +5,9 @@ namespace LearnCSharp.Application.Interfaces
     public interface IUserService
     {
         Task CreateAsync(CreateUserDTO model);
-
         Task<UserDTO> GetUserByIdAsync(Guid id);
-
-        Task Update(Guid id, UpdateUserDTO model);
+        Task UpdateAsync(Guid id, UpdateUserDTO model);
+        Task DeleteAsync(Guid id, bool isActive);
+        Task ChangePasswordAsync(Guid id, ChangePasswordDTO model);
     }
 }

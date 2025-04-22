@@ -1,7 +1,5 @@
 ﻿using LearnCSharp.Application.Interfaces;
-using LearnCSharp.Application.Models.DTOs.Category;
 using LearnCSharp.Application.Models.DTOs.User;
-using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,6 +14,29 @@ namespace LearnCSharp.Infrastructure.Identity
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
+        }
+
+        public async Task DeleteAsync(Guid id, bool isActive)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            user.IsActive = isActive;
+            user.UpdatedDate = DateTime.Now;
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                }
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
         }
 
         public async Task CreateAsync(CreateUserDTO model)
@@ -77,14 +98,70 @@ namespace LearnCSharp.Infrastructure.Identity
             return data;
         }
 
-        public async Task Update(Guid id, UpdateUserDTO model)
+        public async Task UpdateAsync(Guid id, UpdateUserDTO model)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
             {
                 throw new InvalidOperationException($"User with ID {id} not found.");
             }
-            throw new NotImplementedException();
+            user.UserName = model.UserName ?? user.UserName;
+            user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+            user.FullName = model.FullName ?? user.FullName;
+            user.Address = model.Address ?? user.Address;
+            user.UpdatedDate = DateTime.Now;
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    throw new Exception("Failed to update user");
+                }
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
+        public async Task ChangePasswordAsync(Guid id, ChangePasswordDTO model)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+            {
+                throw new InvalidOperationException($"User with ID {id} not found.");
+            }
+            var passWordCurrent = await _userManager.CheckPasswordAsync(user, model.CurrentPassword);
+            if (!passWordCurrent)
+            {
+                throw new Exception("Current password is incorrect");
+            }
+            if (model.NewPassword != model.ConfirmNewPassword)
+            {
+                throw new Exception("New password and confirm password do not match");
+            }
+            user.UpdatedDate = DateTime.Now;
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
+                var result = await _userManager.ChangePasswordAsync(user,model.CurrentPassword,model.NewPassword);
+                if (!result.Succeeded)
+                {
+                    throw new Exception("Failed to change password");
+                }
+                await _userManager.UpdateAsync(user);
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
         }
 
         private async Task<bool> CheckEmailExitsAsync(string email)

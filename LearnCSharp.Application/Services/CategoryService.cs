@@ -86,10 +86,10 @@ namespace LearnCSharp.Application.Services
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
-            catch
+            catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                throw;
+                throw new Exception(ex.Message);
             }
         }
     }
