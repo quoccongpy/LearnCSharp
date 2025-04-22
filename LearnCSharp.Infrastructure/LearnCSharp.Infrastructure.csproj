@@ -16,6 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\LearnCSharp.Application\LearnCSharp.Application.csproj" />
 	  <ProjectReference Include="..\LearnCSharp.Domain\LearnCSharp.Domain.csproj" />
 	</ItemGroup>
 

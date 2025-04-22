@@ -63,18 +63,18 @@ namespace LearnCSharp.Application.Services
 
         public async Task<CategoryDTO> GetByIdAsync(int id)
         {
-            var category = await _unitOfWork.Category.GetByIdAsync(a => a.Id==id);
+            var category = await _unitOfWork.Category.GetByIdAsync(a => a.Id == id);
             var data = new CategoryDTO()
             {
-                Name=category.Name,
+                Name = category.Name,
             };
             return data;
         }
 
-        public async Task Update(int id ,CategoryDTO model)
+        public async Task Update(int id, CategoryDTO model)
         {
             var category = await _unitOfWork.Category.GetByIdAsync(a => a.Id == id);
-            if(category == null)
+            if (category == null)
             {
                 throw new InvalidOperationException($"Categorty with ID {id} not found.");
             };
@@ -86,10 +86,10 @@ namespace LearnCSharp.Application.Services
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
-            catch
+            catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                throw;
+                throw new Exception(ex.Message);
             }
         }
     }

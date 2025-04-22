@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LearnCSharp.Infrastructure.Migrations
 {
     [DbContext(typeof(LearnCSharpDbContext))]
-    [Migration("20250416184818_addProductImageToDb")]
-    partial class addProductImageToDb
+    [Migration("20250422163734_addInitDb")]
+    partial class addInitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -330,7 +330,7 @@ namespace LearnCSharp.Infrastructure.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("UpdatedDate")
+                    b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")

@@ -34,7 +34,7 @@ namespace LearnCSharp.Infrastructure.Migrations
                     FullName = table.Column<string>(type: "text", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Dob = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -132,6 +132,20 @@ namespace LearnCSharp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_product", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "product_image",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    product_it = table.Column<int>(type: "integer", nullable: false),
+                    image_url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_product_image", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -324,6 +338,9 @@ namespace LearnCSharp.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "product");
+
+            migrationBuilder.DropTable(
+                name: "product_image");
 
             migrationBuilder.DropTable(
                 name: "refresh_toke");
