@@ -15,11 +15,13 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             Category = new CategoryRepository(context);
             Product = new ProductRepository(context);
             ProductImage = new ProductImageRepository(context);
+            RefreshToken = new RefreshTokenRepository(context);
         }
 
         public ICategoryRepository Category { get; private set; }
         public IProductRepository Product { get; private set; }
         public IProductImageRepository ProductImage { get; private set; }
+        public IRefreshTokenRepository RefreshToken { get; private set; }
 
         public async Task BeginTransactionAsync()
         {

@@ -5,6 +5,7 @@
         ICategoryRepository Category { get; }
         IProductRepository Product { get; }
         IProductImageRepository ProductImage { get; }
+        IRefreshTokenRepository  RefreshToken { get; }
 
         Task<int> CompleteAsync();
 

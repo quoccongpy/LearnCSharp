@@ -38,6 +38,22 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<T> GetByfilterAsync(Expression<Func<T, bool>> filter, bool tracked = true)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return await query.FirstOrDefaultAsync();
+        }
+
         public async Task<T> GetByIdAsync(Expression<Func<T, bool>> filter, bool tracked = true)
         {
             IQueryable<T> query = _dbSet;
