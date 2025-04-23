@@ -4,9 +4,11 @@ using LearnCSharp.Application.Services;
 using LearnCSharp.Domain.Interfaces;
 using LearnCSharp.Infrastructure;
 using LearnCSharp.Infrastructure.Identity;
+using LearnCSharp.Infrastructure.Persistence.ConfigOptions;
 using LearnCSharp.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
 {
@@ -40,6 +43,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
 })
 .AddEntityFrameworkStores<LearnCSharpDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.Configure<JwtTokenSettings>(builder.Configuration.GetSection("JwtTokenSettings"));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
