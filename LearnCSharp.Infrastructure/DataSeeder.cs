@@ -1,4 +1,5 @@
-﻿using LearnCSharp.Infrastructure.Identity;
+﻿using LearnCSharp.Application.Utility;
+using LearnCSharp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace LearnCSharp.Infrastructure
@@ -11,14 +12,26 @@ namespace LearnCSharp.Infrastructure
             var adminRoleId = Guid.NewGuid();
             if (!context.Roles.Any())
             {
-                var data = new AppRole()
+                var roles = new List<AppRole>
                 {
-                    Id = adminRoleId,
-                    Name = "Admin",
-                    NormalizedName = "ADMIN",
+                    new AppRole
+                    {
+                        Id= adminRoleId,
+                        Name = SD.RoleAdmin,
+                        NormalizedName = "ADMIN",
+                    },
+                    new AppRole
+                    {
+                        Id= Guid.NewGuid(),
+                        Name = SD.RoleCustomer,
+                        NormalizedName = "CUSTOMER",
+                    } 
                 };
-                await context.Roles.AddAsync(data);
-                await context.SaveChangesAsync();
+                foreach (var role in roles)
+                {
+                    await context.Roles.AddAsync(role);
+                    await context.SaveChangesAsync();
+                }
             }
 
             if (!context.Users.Any())

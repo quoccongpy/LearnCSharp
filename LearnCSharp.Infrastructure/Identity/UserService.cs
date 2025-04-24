@@ -1,5 +1,6 @@
 ﻿using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models.DTOs.User;
+using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -69,6 +70,7 @@ namespace LearnCSharp.Infrastructure.Identity
                 {
                     throw new Exception("Failed to create user");
                 }
+                await _userManager.AddToRoleAsync(user, SD.RoleCustomer);
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }

@@ -137,10 +137,16 @@ namespace LearnCSharp.Infrastructure.Identity
         private async Task<string> GenerateJwtToken(AppUser user)
         {
             var timeExpire = DateTime.Now.AddHours(_jwtTokenSettings.ExpireInHours);
+
             var listClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name,user.UserName),
             };
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var role in roles)
+            {
+                listClaims.Add(new Claim(ClaimTypes.Role,role));
+            }
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtTokenSettings.Key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
