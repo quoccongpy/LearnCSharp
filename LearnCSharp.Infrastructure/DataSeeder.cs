@@ -25,7 +25,7 @@ namespace LearnCSharp.Infrastructure
                         Id= Guid.NewGuid(),
                         Name = SD.RoleCustomer,
                         NormalizedName = "CUSTOMER",
-                    } 
+                    }
                 };
                 foreach (var role in roles)
                 {

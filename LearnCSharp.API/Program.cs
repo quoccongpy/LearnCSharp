@@ -11,12 +11,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<LearnCSharpDbContext>(opt =>
@@ -37,9 +39,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
-
     options.User.RequireUniqueEmail = true;
-
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.MaxFailedAccessAttempts = 5;
 })
@@ -60,6 +60,7 @@ var tokenValidationParameters = new TokenValidationParameters
     ClockSkew = TimeSpan.Zero
 };
 builder.Services.AddSingleton(tokenValidationParameters);
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -81,17 +82,53 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.CustomOperationIds(apiDesc =>
+        apiDesc.TryGetMethodInfo(out MethodInfo methodInfo) ? methodInfo.Name : null);
+
+    c.SwaggerDoc("AdminAPI", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "API",
+        Description = "API for Product"
+    });
+
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Enter JWT token here (only the token, no 'Bearer ' needed)",
+
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/AdminAPI/swagger.json", "Admin API");
+        c.DisplayOperationId();
+        c.DisplayRequestDuration();
+    });
 }
 
 app.UseGlobalExceptionHandling();
