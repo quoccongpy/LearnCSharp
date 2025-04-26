@@ -1,5 +1,7 @@
 ﻿using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models.DTOs.Category;
+using LearnCSharp.Application.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnCSharp.API.Controllers
@@ -16,6 +18,7 @@ namespace LearnCSharp.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = SD.RoleAdmin)]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryDTO model)
         {
             try

@@ -38,7 +38,7 @@ namespace LearnCSharp.Application.Services
                     Thumbnaill = imagePath,
                     Description = model.Description,
                     CategoryId = model.CategoryId,
-                    CreatedDate = DateTime.Now,
+                    CreatedDate = DateTime.UtcNow,
                 };
                 await _unitOfWork.Product.CreateAsync(data);
                 await _unitOfWork.CompleteAsync();
@@ -59,7 +59,7 @@ namespace LearnCSharp.Application.Services
                 }
                 await _unitOfWork.CommitTransactionAsync();
             }
-            catch 
+            catch
             {
                 await _unitOfWork.RollbackTransactionAsync();
                 throw;
@@ -125,7 +125,7 @@ namespace LearnCSharp.Application.Services
                 product.Price = model.Price > 0 ? model.Price.Value : product.Price;
                 product.Description = model.Description ?? product.Description;
                 product.CategoryId = model.CategoryId ?? product.CategoryId;
-                product.UpdatedDate = DateTime.Now;
+                product.UpdatedDate = DateTime.UtcNow;
                 if (model.Thumbnaill != null)
                 {
                     if (!string.IsNullOrEmpty(product.Thumbnaill))

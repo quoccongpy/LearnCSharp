@@ -1,13 +1,12 @@
 ﻿using LearnCSharp.Domain.Entities;
 using LearnCSharp.Infrastructure.Identity;
 using LearnCSharp.Infrastructure.Persistence.Configurations;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace LearnCSharp.Infrastructure
 {
-    public class LearnCSharpDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
+    public class LearnCSharpDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
         public LearnCSharpDbContext(DbContextOptions<LearnCSharpDbContext> options) : base(options)
         {

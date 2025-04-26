@@ -1,5 +1,6 @@
 ﻿using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models.DTOs.User;
+using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -59,7 +60,7 @@ namespace LearnCSharp.Infrastructure.Identity
                 Address = model.Address,
                 FullName = model.FullName,
                 IsActive = true,
-                CreatedDate = DateTime.Now,
+                CreatedDate = DateTime.UtcNow,
             };
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -69,6 +70,7 @@ namespace LearnCSharp.Infrastructure.Identity
                 {
                     throw new Exception("Failed to create user");
                 }
+                await _userManager.AddToRoleAsync(user, SD.RoleCustomer);
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
@@ -109,7 +111,7 @@ namespace LearnCSharp.Infrastructure.Identity
             user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
             user.FullName = model.FullName ?? user.FullName;
             user.Address = model.Address ?? user.Address;
-            user.UpdatedDate = DateTime.Now;
+            user.UpdatedDate = DateTime.UtcNow;
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
@@ -148,7 +150,7 @@ namespace LearnCSharp.Infrastructure.Identity
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
-                var result = await _userManager.ChangePasswordAsync(user,model.CurrentPassword,model.NewPassword);
+                var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
                 if (!result.Succeeded)
                 {
                     throw new Exception("Failed to change password");
