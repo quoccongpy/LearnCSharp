@@ -6,6 +6,7 @@
         IProductRepository Product { get; }
         IProductImageRepository ProductImage { get; }
         IRefreshTokenRepository  RefreshToken { get; }
+        IOrderRepository Order { get; }
 
         Task<int> CompleteAsync();
 
