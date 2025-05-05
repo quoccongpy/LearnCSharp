@@ -12,5 +12,7 @@ namespace LearnCSharp.Application.Interfaces
         Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10);
 
         Task<ProductDTO> GetByIdAsync(int id);
+
+        Task DeleteAsync(int id);
     }
 }

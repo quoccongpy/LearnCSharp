@@ -18,18 +18,15 @@ namespace LearnCSharp.Application.Services
         {
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
                 var data = new Category()
                 {
                     Name = model.Name
                 };
                 await _unitOfWork.Category.CreateAsync(data);
                 await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
                 throw new Exception(ex.Message);
             }
         }
@@ -39,14 +36,11 @@ namespace LearnCSharp.Application.Services
             var category = await _unitOfWork.Category.GetByIdAsync(a => a.Id == id);
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
                 await _unitOfWork.Category.RemoveAsync(category);
                 await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
             }
             catch
             {
-                await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
         }
@@ -81,14 +75,11 @@ namespace LearnCSharp.Application.Services
             category.Name = model.Name;
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
                 _unitOfWork.Category.Update(category);
                 await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync();
                 throw new Exception(ex.Message);
             }
         }

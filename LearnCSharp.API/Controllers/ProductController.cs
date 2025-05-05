@@ -60,5 +60,19 @@ namespace LearnCSharp.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            try
+            {
+                await _serviceProduct.DeleteAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

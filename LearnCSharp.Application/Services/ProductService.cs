@@ -4,7 +4,6 @@ using LearnCSharp.Application.Models.DTOs.Product;
 using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
 using System.Linq.Expressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LearnCSharp.Application.Services
 {
@@ -62,6 +61,20 @@ namespace LearnCSharp.Application.Services
             catch
             {
                 await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+            try
+            {
+                await _unitOfWork.Product.RemoveAsync(product);
+                await _unitOfWork.CompleteAsync();
+            }
+            catch
+            {
                 throw;
             }
         }
