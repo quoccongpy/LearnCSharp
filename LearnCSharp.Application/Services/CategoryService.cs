@@ -33,7 +33,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task DeleteAsync(int id)
         {
-            var category = await _unitOfWork.Category.GetByIdAsync(a => a.Id == id);
+            var category = await _unitOfWork.Category.GetByfilterAsync(a => a.Id == id);
             try
             {
                 await _unitOfWork.Category.RemoveAsync(category);
@@ -57,7 +57,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task<CategoryDTO> GetByIdAsync(int id)
         {
-            var category = await _unitOfWork.Category.GetByIdAsync(a => a.Id == id);
+            var category = await _unitOfWork.Category.GetByfilterAsync(a => a.Id == id);
             var data = new CategoryDTO()
             {
                 Name = category.Name,
@@ -67,7 +67,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task Update(int id, CategoryDTO model)
         {
-            var category = await _unitOfWork.Category.GetByIdAsync(a => a.Id == id);
+            var category = await _unitOfWork.Category.GetByfilterAsync(a => a.Id == id);
             if (category == null)
             {
                 throw new InvalidOperationException($"Categorty with ID {id} not found.");

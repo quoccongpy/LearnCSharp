@@ -5,7 +5,7 @@ namespace LearnCSharp.Application.Interfaces
 {
     public interface IOrderService
     {
-        Task CreateAsync(OrderCreateDTO model, Guid userId);
+        Task CreateAsync(OrderCreateDTO model);
 
         Task UpdateAsync(int id, OrderUpdateDTO model);
 

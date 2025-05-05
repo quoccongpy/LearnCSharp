@@ -1,5 +1,6 @@
 ﻿using LearnCSharp.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Diagnostics;
 using System.Linq.Expressions;
 
@@ -54,20 +55,25 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<T> GetByIdAsync(Expression<Func<T, bool>> filter, bool tracked = true)
+        //public async Task<T> GetByIdAsync(Expression<Func<T, bool>> filter, bool tracked = true)
+        //{
+        //    IQueryable<T> query = _dbSet;
+
+        //    if (!tracked)
+        //    {
+        //        query = query.AsNoTracking();
+        //    }
+
+        //    if (filter != null)
+        //    {
+        //        query = query.Where(filter);
+        //    }
+        //    return await query.FirstOrDefaultAsync();
+        //}
+
+        public async Task<T> GetByIdAsync(int id)
         {
-            IQueryable<T> query = _dbSet;
-
-            if (!tracked)
-            {
-                query = query.AsNoTracking();
-            }
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-            return await query.FirstOrDefaultAsync();
+            return await _dbSet.FindAsync(id);
         }
 
         public async Task<(List<T> Data, int TotalCount)> GetPagedAsync(Expression<Func<T, bool>> filter, int skip, int take, bool tracked = false)

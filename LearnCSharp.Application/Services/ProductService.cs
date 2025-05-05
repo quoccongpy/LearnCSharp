@@ -67,7 +67,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task DeleteAsync(int id)
         {
-            var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+            var product = await _unitOfWork.Product.GetByfilterAsync(a => a.Id == id);
             try
             {
                 await _unitOfWork.Product.RemoveAsync(product);
@@ -108,7 +108,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task<ProductDTO> GetByIdAsync(int id)
         {
-            var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+            var product = await _unitOfWork.Product.GetByfilterAsync(a => a.Id == id);
 
             var dataProductImage = await _productImageService.GetListProductImageByIdAsync(id);
             var data = new ProductDTO()
@@ -129,7 +129,7 @@ namespace LearnCSharp.Application.Services
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
-                var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+                var product = await _unitOfWork.Product.GetByfilterAsync(a => a.Id == id);
                 if (product == null)
                 {
                     throw new InvalidOperationException($"Product with ID {id} not found.");

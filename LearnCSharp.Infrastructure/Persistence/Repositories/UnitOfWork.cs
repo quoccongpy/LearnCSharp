@@ -17,6 +17,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             ProductImage = new ProductImageRepository(context);
             RefreshToken = new RefreshTokenRepository(context);
             Order = new OrderRepository(context);
+            OrderDetail = new OrderDetailRepository(context);
         }
 
         public ICategoryRepository Category { get; private set; }
@@ -24,6 +25,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
         public IProductImageRepository ProductImage { get; private set; }
         public IRefreshTokenRepository RefreshToken { get; private set; }
         public IOrderRepository  Order { get; private set; }
+        public IOrderDetailRepository  OrderDetail { get; private set; }
 
         public async Task BeginTransactionAsync()
         {
