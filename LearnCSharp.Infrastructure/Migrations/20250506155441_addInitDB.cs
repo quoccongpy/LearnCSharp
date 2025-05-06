@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LearnCSharp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addInitDb : Migration
+    public partial class addInitDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -82,7 +82,7 @@ namespace LearnCSharp.Infrastructure.Migrations
                     Address = table.Column<string>(type: "TEXT", nullable: true),
                     note = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ordate_date = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
-                    status = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     total_money = table.Column<float>(type: "real", nullable: false),
                     shipping_method = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     shipping_address = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
@@ -106,7 +106,6 @@ namespace LearnCSharp.Infrastructure.Migrations
                     price = table.Column<float>(type: "real", nullable: false),
                     quantity = table.Column<int>(type: "integer", nullable: false),
                     total = table.Column<float>(type: "real", nullable: false),
-                    color = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     product_id = table.Column<int>(type: "integer", nullable: false),
                     order_id = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -149,12 +148,13 @@ namespace LearnCSharp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "refresh_toke",
+                name: "refresh_token",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: true),
                     expiry_date = table.Column<DateTime>(type: "TIMESTAMP", nullable: false),
                     is_revoked = table.Column<bool>(type: "boolean", nullable: false),
                     created_date = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
@@ -162,7 +162,7 @@ namespace LearnCSharp.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_refresh_toke", x => x.id);
+                    table.PrimaryKey("PK_refresh_token", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -343,7 +343,7 @@ namespace LearnCSharp.Infrastructure.Migrations
                 name: "product_image");
 
             migrationBuilder.DropTable(
-                name: "refresh_toke");
+                name: "refresh_token");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

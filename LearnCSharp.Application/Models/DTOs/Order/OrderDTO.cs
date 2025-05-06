@@ -8,7 +8,7 @@
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string Note { get; set; }
-        public DateTime OrderDate { get; set; }
+        public DateTime? OrderDate { get; set; }
         public string Status { get; set; }
         public float TotalMoney { get; set; }
         public string ShippingMethod { get; set; }

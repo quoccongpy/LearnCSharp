@@ -4,7 +4,6 @@ using LearnCSharp.Application.Models.DTOs.Order;
 using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace LearnCSharp.Application.Services
@@ -122,11 +121,10 @@ namespace LearnCSharp.Application.Services
             }
         }
 
-        public async Task<PagedResult<OrderDTO>> GetAllOrderPagingAsync(string? keyword, string? status, Guid? userId, int pageIndex = 1, int pageSize = 10)
+        public async Task<PagedResult<OrderDTO>> GetAllOrderPagingAsync(string? keyword, string? status, int pageIndex = 1, int pageSize = 10)
         {
             Expression<Func<Order, bool>> filter = a => (string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword))
-                                                        && (!string.IsNullOrEmpty(keyword) || a.Status.Contains(status))
-                                                        && (!userId.HasValue || a.UserId == userId.Value);
+                                                        && (!string.IsNullOrEmpty(keyword) || a.Status.Contains(status));
             var (order, totalCount) = await _unitOfWork.Order.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
             var data = order.Select(a => new OrderDTO
             {

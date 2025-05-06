@@ -8,7 +8,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<RefreshToken> builder)
         {
-            builder.ToTable("refresh_toke");
+            builder.ToTable("refresh_token");
             builder.HasKey(a => a.Id);
             builder.Property(a => a.Id).HasColumnName("id");
             builder.Property(a => a.UserId).HasColumnName("user_id").HasColumnType("uuid");

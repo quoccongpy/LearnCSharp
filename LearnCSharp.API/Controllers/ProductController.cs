@@ -1,5 +1,4 @@
 ﻿using LearnCSharp.Application.Interfaces;
-using LearnCSharp.Application.Models.DTOs.Category;
 using LearnCSharp.Application.Models.DTOs.Product;
 using LearnCSharp.Application.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +18,7 @@ namespace LearnCSharp.API.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProdcutPaging(string? keyword, int pageIndex = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProductPaging(string? keyword, int pageIndex = 1, int pageSize = 10)
         {
             var data = await _serviceProduct.GetAllProductPagingAsync(keyword, pageIndex, pageSize);
             return Ok(data);
