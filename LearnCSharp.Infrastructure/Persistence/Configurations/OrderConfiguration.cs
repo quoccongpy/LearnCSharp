@@ -18,7 +18,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
             builder.Property(a => a.Address).HasColumnName("Address").HasColumnType("TEXT");
             builder.Property(a => a.Note).HasColumnName("note").HasMaxLength(100);
             builder.Property(a => a.OrderDate).HasColumnName("ordate_date").HasColumnType("TIMESTAMP").IsRequired(false);
-            builder.Property(a => a.Status).HasColumnName("status").HasConversion<string>();
+            builder.Property(a => a.Status).HasColumnName("status").HasMaxLength(50);
             builder.Property(a => a.TotalMoney).HasColumnName("total_money");
             builder.Property(a => a.ShippingMethod).HasColumnName("shipping_method").HasMaxLength(100);
             builder.Property(a => a.ShippingAddress).HasColumnName("shipping_address").HasMaxLength(200);

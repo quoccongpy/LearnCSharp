@@ -1,22 +1,25 @@
 ﻿using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models;
 using LearnCSharp.Application.Models.DTOs.Order;
+using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Entities;
-using LearnCSharp.Domain.Enums;
 using LearnCSharp.Domain.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LearnCSharp.Application.Services
 {
     public class OrderService : IOrderService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserService _userService;
         private readonly ICurrentUserService _currentUserService;
 
-        public OrderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        public OrderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _userService = userService;
         }
 
         public async Task CreateAsync(OrderCreateDTO model)
@@ -24,9 +27,9 @@ namespace LearnCSharp.Application.Services
             try
             {
                 var userId = _currentUserService.UserId;
-                if (userId == null)
+                if (userId == Guid.Empty)
                 {
-                    throw new Exception("User does not exist");
+                    throw new UnauthorizedAccessException();
                 }
                 var order = new Order()
                 {
@@ -35,12 +38,13 @@ namespace LearnCSharp.Application.Services
                     PhoneNumber = model.PhoneNumber,
                     Address = model.Address,
                     Note = model.Note,
-                    OrderDate = DateTime.Now,
-                    Status = OrderStatus.Pending,
+                    OrderDate = DateTime.UtcNow,
+                    Status = SD.Pending,
                     ShippingMethod = model.ShippingMethod,
                     ShippingAddress = model.ShippingAddress,
                     PaymentMethod = model.PaymentMethod,
-                    UserId = userId
+                    UserId = userId,
+                    IsActive = true,
                 };
                 float totalMoney = 0;
                 var orderDetails = new List<OrderDetails>();
@@ -61,7 +65,7 @@ namespace LearnCSharp.Application.Services
                         Quantity = item.Quantity,
                         Price = product.Price,
                         Total = product.Price * item.Quantity,
-                        //Color = item.Color  
+                        //Color = item.Color
                     };
                     orderDetails.Add(orderDetail);
                     totalMoney += orderDetail.Total;
@@ -71,7 +75,6 @@ namespace LearnCSharp.Application.Services
 
                 await _unitOfWork.BeginTransactionAsync();
                 await _unitOfWork.Order.CreateAsync(order);
-                await _unitOfWork.CompleteAsync();
 
                 foreach (var detail in orderDetails)
                 {
@@ -88,19 +91,89 @@ namespace LearnCSharp.Application.Services
             }
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var userId = _currentUserService.UserId;
+                var user = await _userService.GetUserByIdAsync(userId);
+                var order = await _unitOfWork.Order.GetByIdAsync(id);
+                if (order.UserId != userId && !await _userService.IsUserInRoleAsync(userId, SD.RoleAdmin))
+                {
+                    throw new Exception("You do not have permission to delete this order.");
+                }
+                if (order.Status != SD.Pending)
+                {
+                    throw new Exception("Orders can only be canceled in pending status.");
+                }
+                await _unitOfWork.BeginTransactionAsync();
+
+                order.Status = SD.Cancelled;
+                order.IsActive = false;
+
+                _unitOfWork.Order.Update(order);
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
         }
 
-        public Task<PagedResult<OrderDTO>> GetAllOrderPagingAsync(string keyword, int pageIndex = 1, int pageSize = 10)
+        public async Task<PagedResult<OrderDTO>> GetAllOrderPagingAsync(string? keyword, string? status, Guid? userId, int pageIndex = 1, int pageSize = 10)
         {
-            throw new NotImplementedException();
+            Expression<Func<Order, bool>> filter = a => (string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword))
+                                                        && (!string.IsNullOrEmpty(keyword) || a.Status.Contains(status))
+                                                        && (!userId.HasValue || a.UserId == userId.Value);
+            var (order, totalCount) = await _unitOfWork.Order.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
+            var data = order.Select(a => new OrderDTO
+            {
+                Id = a.Id,
+                Status = a.Status,
+                FullName = a.FullName,
+                PhoneNumber = a.PhoneNumber,
+                Address = a.Address,
+                Note = a.Note,
+                OrderDate = a.OrderDate,
+                TotalMoney = a.TotalMoney,
+                PaymentMethod = a.PaymentMethod,
+            }).ToList();
+
+            var result = new PagedResult<OrderDTO>
+            {
+                Results = data,
+                CurrentPage = pageIndex,
+                RowCount = totalCount,
+                PageSize = pageSize
+            };
+            return result;
         }
 
-        public Task<OrderDTO> GetOrderByIdAsync(int id)
+        public async Task<OrderDTO> GetOrderByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var userId = _currentUserService.UserId;
+            var user = await _userService.GetUserByIdAsync(userId);
+            var order = await _unitOfWork.Order.GetByIdAsync(id);
+
+            var data = new OrderDTO()
+            {
+                Id = order.Id,
+                FullName = order.FullName,
+                Email = order.Email,
+                PhoneNumber = order.PhoneNumber,
+                Address = order.Address,
+                Note = order.Note,
+                OrderDate = order.OrderDate,
+                Status = order.Status,
+                TotalMoney = order.TotalMoney,
+                ShippingAddress = order.ShippingAddress,
+                PaymentMethod = order.PaymentMethod,
+                UserName = user.UserName,
+                OrderDetails = await GetOrderDetailsByOrderIdAsync(id),
+            };
+            return data;
         }
 
         public Task<PagedResult<OrderDTO>> GetOrdersByStatusAsyncPagingAsync(string keyword, int pageIndex = 1, int pageSize = 10)
@@ -116,6 +189,36 @@ namespace LearnCSharp.Application.Services
         public Task UpdateAsync(int id, OrderUpdateDTO model)
         {
             throw new NotImplementedException();
+        }
+
+        private async Task<List<OrderDetailDTO>> GetOrderDetailsByOrderIdAsync(int orderId)
+        {
+            var orderDetail = await _unitOfWork.OrderDetail.GetAllAsync(a => a.OrderId == orderId);
+
+            var productIds = orderDetail.Select(x => x.ProductId).Distinct().ToList();
+
+            var products = await _unitOfWork.Product.GetAllAsync(a => productIds.Contains(a.Id));
+
+            var productDict = products.ToDictionary(p => p.Id);
+
+            var data = new List<OrderDetailDTO>();
+            foreach (var item in orderDetail)
+            {
+                if (productDict.TryGetValue(item.ProductId, out var product))
+                {
+                    data.Add(new OrderDetailDTO()
+                    {
+                        Id = item.Id,
+                        //OrderId = item.OrderId,
+                        //ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        Price = product.Price,
+                        ProductName = product.Name,
+                        ProductThumbnail = product.Thumbnaill,
+                    });
+                }
+            }
+            return data;
         }
     }
 }

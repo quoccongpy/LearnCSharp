@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 
 namespace LearnCSharp.Infrastructure.Persistence.Repositories
 {
-
     //https://medium.com/@codebob75/repository-pattern-c-ultimate-guide-entity-framework-core-clean-architecture-dtos-dependency-6a8d8b444dcb
     public class Repository<T> : IRepository<T> where T : class
     {
@@ -78,14 +77,18 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
 
         public async Task<(List<T> Data, int TotalCount)> GetPagedAsync(Expression<Func<T, bool>> filter, int skip, int take, bool tracked = false)
         {
-           var query = _dbSet.AsQueryable();
+            IQueryable<T> query = _dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
             if (!tracked)
             {
                 query = query.AsNoTracking();
             }
             var totalCount = await query.CountAsync();
             var data = await query.Skip(skip).Take(take).ToListAsync();
-            return(data, totalCount);
+            return (data, totalCount);
         }
 
         public async Task RemoveAsync(T entity)

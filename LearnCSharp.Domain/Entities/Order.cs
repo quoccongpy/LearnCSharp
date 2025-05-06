@@ -1,6 +1,4 @@
-﻿using LearnCSharp.Domain.Enums;
-
-namespace LearnCSharp.Domain.Entities
+﻿namespace LearnCSharp.Domain.Entities
 {
     public class Order
     {
@@ -10,8 +8,8 @@ namespace LearnCSharp.Domain.Entities
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string Note { get; set; }
-        public DateTime? OrderDate { get; set; }
-        public OrderStatus Status { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string Status { get; set; }
         public float TotalMoney { get; set; }
         public string ShippingMethod { get; set; }
         public string ShippingAddress { get; set; }

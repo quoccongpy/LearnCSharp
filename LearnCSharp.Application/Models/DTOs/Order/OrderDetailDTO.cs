@@ -9,6 +9,6 @@
         public string ProductThumbnail { get; set; }
         public int Quantity { get; set; }
         public float Price { get; set; }
-        public float SubTotal { get; set; }
+        //public float SubTotal { get; set; }
     }
 }
