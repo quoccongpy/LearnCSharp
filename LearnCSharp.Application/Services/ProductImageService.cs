@@ -15,7 +15,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task DeleteAsync(int id)
         {
-            var product = await _unitOfWork.ProductImage.GetByIdAsync(a => a.ProductId == id);
+            var product = await _unitOfWork.ProductImage.GetByfilterAsync(a => a.ProductId == id);
             try
             {
                 await _unitOfWork.BeginTransactionAsync();

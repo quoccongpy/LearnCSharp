@@ -31,6 +31,10 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddHttpContextAccessor();
 
 //builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
 //builder.Services.AddScoped<RoleManager<AppRole>, RoleManager<AppRole>>();

@@ -4,7 +4,6 @@ using LearnCSharp.Application.Models.DTOs.Product;
 using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
 using System.Linq.Expressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LearnCSharp.Application.Services
 {
@@ -66,6 +65,20 @@ namespace LearnCSharp.Application.Services
             }
         }
 
+        public async Task DeleteAsync(int id)
+        {
+            var product = await _unitOfWork.Product.GetByfilterAsync(a => a.Id == id);
+            try
+            {
+                await _unitOfWork.Product.RemoveAsync(product);
+                await _unitOfWork.CompleteAsync();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10)
         {
             Expression<Func<Product, bool>> filter = null;
@@ -95,7 +108,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task<ProductDTO> GetByIdAsync(int id)
         {
-            var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+            var product = await _unitOfWork.Product.GetByfilterAsync(a => a.Id == id);
 
             var dataProductImage = await _productImageService.GetListProductImageByIdAsync(id);
             var data = new ProductDTO()
@@ -116,7 +129,7 @@ namespace LearnCSharp.Application.Services
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
-                var product = await _unitOfWork.Product.GetByIdAsync(a => a.Id == id);
+                var product = await _unitOfWork.Product.GetByfilterAsync(a => a.Id == id);
                 if (product == null)
                 {
                     throw new InvalidOperationException($"Product with ID {id} not found.");
