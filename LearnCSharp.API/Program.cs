@@ -15,14 +15,33 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var LearnCSharpCorsPolicy = "LearnCSharpCorsPolicy";
+var configuration = builder.Configuration;
+
+
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
 builder.Services.AddDbContext<LearnCSharpDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddCors(o => o.AddPolicy(LearnCSharpCorsPolicy, builder =>
+{
+    builder.AllowAnyMethod()
+        .AllowAnyHeader()
+        .WithOrigins(configuration["AllowedOrigins"])
+        .AllowCredentials();
+}));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -138,7 +157,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+
 app.UseGlobalExceptionHandling();
+app.UseCors(LearnCSharpCorsPolicy);
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
