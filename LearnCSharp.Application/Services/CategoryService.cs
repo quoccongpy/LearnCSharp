@@ -45,21 +45,23 @@ namespace LearnCSharp.Application.Services
             }
         }
 
-        public async Task<IEnumerable<CategoryDTO>> GetAllCategoryAsync()
+        public async Task<IEnumerable<CategoryListItemDTO>> GetAllCategoryAsync()
         {
             var category = await _unitOfWork.Category.GetAllAsync();
-            var data = category.Select(a => new CategoryDTO()
+            var data = category.Select(a => new CategoryListItemDTO()
             {
+                Id = a.Id,
                 Name = a.Name,
             });
             return data;
         }
 
-        public async Task<CategoryDTO> GetByIdAsync(int id)
+        public async Task<CategoryListItemDTO> GetByIdAsync(int id)
         {
             var category = await _unitOfWork.Category.GetByfilterAsync(a => a.Id == id);
-            var data = new CategoryDTO()
+            var data = new CategoryListItemDTO()
             {
+                Id = category.Id,
                 Name = category.Name,
             };
             return data;

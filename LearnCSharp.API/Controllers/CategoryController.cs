@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LearnCSharp.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/category")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -32,21 +32,21 @@ namespace LearnCSharp.API.Controllers
             }
         }
 
-        [HttpGet("get-all")]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetAllCategory()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CategoryListItemDTO>>> GetAllCategory()
         {
             var data = await _serviceCategory.GetAllCategoryAsync();
             return Ok(data);
         }
 
-        [HttpGet("id")]
-        public async Task<ActionResult<CategoryDTO>> GetByIdCategory(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<CategoryListItemDTO>> GetByIdCategory(int id)
         {
             var data = await _serviceCategory.GetByIdAsync(id);
             return Ok(data);
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDTO model)
         {
             try
@@ -60,7 +60,7 @@ namespace LearnCSharp.API.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             try

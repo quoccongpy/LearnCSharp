@@ -4,8 +4,8 @@ namespace LearnCSharp.Application.Interfaces
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryDTO>> GetAllCategoryAsync();
-        Task<CategoryDTO> GetByIdAsync(int id);
+        Task<IEnumerable<CategoryListItemDTO>> GetAllCategoryAsync();
+        Task<CategoryListItemDTO> GetByIdAsync(int id);
 
         Task CreateAsync(CategoryDTO model);
         Task Update(int id,CategoryDTO model);
