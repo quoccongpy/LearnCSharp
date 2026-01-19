@@ -104,14 +104,13 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("status");
 
-                    b.Property<float>("TotalMoney")
-                        .HasColumnType("real")
-                        .HasColumnName("total_money");
+                    b.Property<int>("TotalItem")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_item");
 
-                    b.Property<string>("TrackingNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("tracking_number");
+                    b.Property<double>("TotalMoney")
+                        .HasColumnType("double precision")
+                        .HasColumnName("total_money");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -135,8 +134,8 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("order_id");
 
-                    b.Property<float>("Price")
-                        .HasColumnType("real")
+                    b.Property<double>("Price")
+                        .HasColumnType("double precision")
                         .HasColumnName("price");
 
                     b.Property<int>("ProductId")
@@ -147,11 +146,15 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
-                    b.Property<float>("Total")
-                        .HasColumnType("real")
+                    b.Property<double>("Total")
+                        .HasColumnType("double precision")
                         .HasColumnName("total");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("order_details", (string)null);
                 });
@@ -186,16 +189,18 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("real")
                         .HasColumnName("price");
 
-                    b.Property<string>("Thumbnaill")
+                    b.Property<string>("Thumbnail")
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)")
-                        .HasColumnName("thumbnaill");
+                        .HasColumnName("thumbnail");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("TIMESTAMP")
                         .HasColumnName("update_at");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("product", (string)null);
                 });
@@ -305,10 +310,10 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("Dob")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -353,7 +358,7 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -474,6 +479,36 @@ namespace LearnCSharp.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LearnCSharp.Domain.Entities.OrderDetails", b =>
+                {
+                    b.HasOne("LearnCSharp.Domain.Entities.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LearnCSharp.Domain.Entities.Product", "Product")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("LearnCSharp.Domain.Entities.Product", b =>
+                {
+                    b.HasOne("LearnCSharp.Domain.Entities.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("LearnCSharp.Infrastructure.Identity.AppRole", null)
@@ -523,6 +558,21 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LearnCSharp.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("LearnCSharp.Domain.Entities.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("LearnCSharp.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 #pragma warning restore 612, 618
         }

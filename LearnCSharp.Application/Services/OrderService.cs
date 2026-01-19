@@ -45,7 +45,7 @@ namespace LearnCSharp.Application.Services
                     UserId = userId,
                     IsActive = true,
                 };
-                float totalMoney = 0;
+                double totalMoney = 0;
                 var orderDetails = new List<OrderDetails>();
                 foreach (var item in model.OrderDetails)
                 {
@@ -212,7 +212,7 @@ namespace LearnCSharp.Application.Services
                         Quantity = item.Quantity,
                         Price = product.Price,
                         ProductName = product.Name,
-                        ProductThumbnail = product.Thumbnaill,
+                        ProductThumbnail = product.Thumbnail,
                     });
                 }
             }

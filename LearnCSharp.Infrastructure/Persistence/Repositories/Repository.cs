@@ -75,9 +75,17 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<(List<T> Data, int TotalCount)> GetPagedAsync(Expression<Func<T, bool>> filter, int skip, int take, bool tracked = false)
+        public async Task<(List<T> Data, int TotalCount)> GetPagedAsync(Expression<Func<T, bool>> filter, int skip, int take, 
+                                                                        bool tracked = false, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
+            if(includes != null)
+            {
+                foreach(var include in includes)
+                {
+                    query=query.Include(include);
+                }
+            }
             if (filter != null)
             {
                 query = query.Where(filter);

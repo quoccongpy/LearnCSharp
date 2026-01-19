@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LearnCSharp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addInitDB : Migration
+    public partial class addInitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,10 +33,10 @@ namespace LearnCSharp.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FullName = table.Column<string>(type: "text", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    Dob = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Dob = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -83,54 +83,18 @@ namespace LearnCSharp.Infrastructure.Migrations
                     note = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ordate_date = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
                     status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    total_money = table.Column<float>(type: "real", nullable: false),
+                    total_money = table.Column<double>(type: "double precision", nullable: false),
                     shipping_method = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     shipping_address = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     shipping_date = table.Column<DateTime>(type: "TIMESTAMP", nullable: false),
-                    tracking_number = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     payment_method = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    total_item = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_order", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "order_details",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    price = table.Column<float>(type: "real", nullable: false),
-                    quantity = table.Column<int>(type: "integer", nullable: false),
-                    total = table.Column<float>(type: "real", nullable: false),
-                    product_id = table.Column<int>(type: "integer", nullable: false),
-                    order_id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_order_details", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "product",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "character varying(350)", maxLength: 350, nullable: true),
-                    price = table.Column<float>(type: "real", nullable: false),
-                    thumbnaill = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
-                    description = table.Column<string>(type: "TEXT", nullable: true),
-                    create_at = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
-                    update_at = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
-                    category_id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_product", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -271,6 +235,60 @@ namespace LearnCSharp.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "product",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "character varying(350)", maxLength: 350, nullable: true),
+                    price = table.Column<float>(type: "real", nullable: false),
+                    thumbnail = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
+                    description = table.Column<string>(type: "TEXT", nullable: true),
+                    create_at = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
+                    update_at = table.Column<DateTime>(type: "TIMESTAMP", nullable: true),
+                    category_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_product", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_product_categories_category_id",
+                        column: x => x.category_id,
+                        principalTable: "categories",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "order_details",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    price = table.Column<double>(type: "double precision", nullable: false),
+                    quantity = table.Column<int>(type: "integer", nullable: false),
+                    total = table.Column<double>(type: "double precision", nullable: false),
+                    product_id = table.Column<int>(type: "integer", nullable: false),
+                    order_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_order_details", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_order_details_order_order_id",
+                        column: x => x.order_id,
+                        principalTable: "order",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_order_details_product_product_id",
+                        column: x => x.product_id,
+                        principalTable: "product",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -307,6 +325,21 @@ namespace LearnCSharp.Infrastructure.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_order_details_order_id",
+                table: "order_details",
+                column: "order_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_order_details_product_id",
+                table: "order_details",
+                column: "product_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_product_category_id",
+                table: "product",
+                column: "category_id");
         }
 
         /// <inheritdoc />
@@ -328,16 +361,7 @@ namespace LearnCSharp.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "categories");
-
-            migrationBuilder.DropTable(
-                name: "order");
-
-            migrationBuilder.DropTable(
                 name: "order_details");
-
-            migrationBuilder.DropTable(
-                name: "product");
 
             migrationBuilder.DropTable(
                 name: "product_image");
@@ -350,6 +374,15 @@ namespace LearnCSharp.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "order");
+
+            migrationBuilder.DropTable(
+                name: "product");
+
+            migrationBuilder.DropTable(
+                name: "categories");
         }
     }
 }

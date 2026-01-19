@@ -26,15 +26,15 @@ namespace LearnCSharp.Application.Services
             {
                 await _unitOfWork.BeginTransactionAsync();
                 string imagePath = null;
-                if (model.Thumbnaill != null)
+                if (model.Thumbnail != null)
                 {
-                    imagePath = await _imageService.UploadImageAsync(model.Thumbnaill);
+                    imagePath = await _imageService.UploadImageAsync(model.Thumbnail);
                 }
                 var data = new Product()
                 {
                     Name = model.Name,
                     Price = model.Price,
-                    Thumbnaill = imagePath,
+                    Thumbnail = imagePath,
                     Description = model.Description,
                     CategoryId = model.CategoryId,
                     CreatedDate = DateTime.UtcNow,
@@ -42,13 +42,13 @@ namespace LearnCSharp.Application.Services
                 await _unitOfWork.Product.CreateAsync(data);
                 await _unitOfWork.CompleteAsync();
 
-                if (model.Image != null && model.Image.Count > 0)
+                if (model.Images?.Any() == true)
                 {
-                    var imagePaths = await _imageService.UploadMultipleImageAsync(model.Image);
-                    var dataProductImage = imagePath.Select(a => new ProductImage()
+                    var imagePaths = await _imageService.UploadMultipleImageAsync(model.Images);
+                    var dataProductImage = imagePaths.Select(a => new ProductImage()
                     {
                         ProductId = data.Id,
-                        ImageUrl = imagePath,
+                        ImageUrl = a,
                     }).ToList();
                     foreach (var item in dataProductImage)
                     {
@@ -86,15 +86,16 @@ namespace LearnCSharp.Application.Services
             {
                 filter = a => a.Name.Contains(keyword);
             }
-            var (products, totalCount) = await _unitOfWork.Product.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
+            var (products, totalCount) = await _unitOfWork.Product.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize,false,includes:a=>a.Category);
             var data = products.Select(a => new ProductDTO
             {
                 Id = a.Id,
                 Name = a.Name,
                 Price = a.Price,
-                Thumbnaill = a.Thumbnaill,
+                Thumbnail = a.Thumbnail,
                 Description = a.Description,
                 CategoryId = a.CategoryId,
+                CategoryName=a.Category.Name,
             }).ToList();
             var result = new PagedResult<ProductDTO>
             {
@@ -116,7 +117,7 @@ namespace LearnCSharp.Application.Services
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
-                Thumbnaill = product.Thumbnaill,
+                Thumbnail = product.Thumbnail,
                 Description = product.Description,
                 CategoryId = product.CategoryId,
                 ProductImagesList = dataProductImage.ToList(),
@@ -141,11 +142,11 @@ namespace LearnCSharp.Application.Services
                 product.UpdatedDate = DateTime.UtcNow;
                 if (model.Thumbnaill != null)
                 {
-                    if (!string.IsNullOrEmpty(product.Thumbnaill))
+                    if (!string.IsNullOrEmpty(product.Thumbnail))
                     {
-                        _imageService.DeleteImage(product.Thumbnaill);
+                        _imageService.DeleteImage(product.Thumbnail);
                     }
-                    product.Thumbnaill = await _imageService.UploadImageAsync(model.Thumbnaill);
+                    product.Thumbnail = await _imageService.UploadImageAsync(model.Thumbnaill);
                 }
                 _unitOfWork.Product.Update(product);
                 await _unitOfWork.CompleteAsync();
