@@ -13,7 +13,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
             builder.Property(a => a.Id).HasColumnName("id");
             builder.Property(a => a.Name).HasColumnName("name").HasMaxLength(350);
             builder.Property(a => a.Price).HasColumnName("price");
-            builder.Property(a => a.Thumbnaill).HasColumnName("thumbnaill").HasMaxLength(300);
+            builder.Property(a => a.Thumbnail).HasColumnName("thumbnail").HasMaxLength(300);
             builder.Property(a => a.Description).HasColumnName("description").HasColumnType("TEXT");
             builder.Property(a => a.CreatedDate).HasColumnName("create_at").HasColumnType("TIMESTAMP").IsRequired(false);
             builder.Property(a => a.UpdatedDate).HasColumnName("update_at").HasColumnType("TIMESTAMP").IsRequired(false);

@@ -10,7 +10,7 @@
         public string Note { get; set; }
         public DateTime? OrderDate { get; set; }
         public string Status { get; set; }
-        public float TotalMoney { get; set; }
+        public double TotalMoney { get; set; }
         public string ShippingMethod { get; set; }
         public string ShippingAddress { get; set; }
         public DateTime? ShippingDate { get; set; }

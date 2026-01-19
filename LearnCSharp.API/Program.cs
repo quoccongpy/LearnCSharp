@@ -118,7 +118,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Version = "v1",
         Title = "API",
-        Description = "API for Product"
+        Description = "API for Ecommerce"
     });
 
     var jwtSecurityScheme = new OpenApiSecurityScheme
@@ -160,6 +160,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseGlobalExceptionHandling();
 app.UseCors(LearnCSharpCorsPolicy);
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

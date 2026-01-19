@@ -10,6 +10,7 @@ namespace LearnCSharp.Infrastructure
     {
         public LearnCSharpDbContext(DbContextOptions<LearnCSharpDbContext> options) : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
 
         public DbSet<Category> Category { get; set; }
@@ -19,6 +20,14 @@ namespace LearnCSharp.Infrastructure
         public DbSet<RefreshToken> RefreshToken { get; set; }
         public DbSet<ProductImage> ProductImage { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseLazyLoadingProxies(false);
+                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            }    
+        }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ConfigureIdentityTables();

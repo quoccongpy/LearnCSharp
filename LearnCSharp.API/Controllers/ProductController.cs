@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LearnCSharp.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/product")]
     [ApiController]
     public class ProductController : ControllerBase
     {
@@ -24,7 +24,7 @@ namespace LearnCSharp.API.Controllers
             return Ok(data);
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductDTO>> GetByIdProduct(int id)
         {
             var data = await _serviceProduct.GetByIdAsync(id);

@@ -6,8 +6,8 @@ namespace LearnCSharp.Application.Models.DTOs.Product
     {
         public string Name { get; set; }
         public float Price { get; set; }
-        public IFormFile? Thumbnaill { get; set; }
-        public IList<IFormFile>? Image { get; set; }
+        public IFormFile? Thumbnail { get; set; }
+        public IList<IFormFile>? Images { get; set; }
         public string Description { get; set; }
         public int CategoryId { get; set; }
     }
