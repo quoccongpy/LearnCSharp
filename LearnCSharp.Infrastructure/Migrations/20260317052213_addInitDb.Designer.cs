@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LearnCSharp.Infrastructure.Migrations
 {
     [DbContext(typeof(LearnCSharpDbContext))]
-    [Migration("20260118170524_addInitDb")]
+    [Migration("20260317052213_addInitDb")]
     partial class addInitDb
     {
         /// <inheritdoc />
