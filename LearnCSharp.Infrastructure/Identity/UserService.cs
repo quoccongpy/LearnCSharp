@@ -3,6 +3,7 @@ using LearnCSharp.Application.Models.DTOs.User;
 using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace LearnCSharp.Infrastructure.Identity
 {
@@ -47,6 +48,10 @@ namespace LearnCSharp.Infrastructure.Identity
                 throw new Exception("Email already in use");
             }
             if (await CheckUserNameExitsAsync(model.UserName))
+            {
+                throw new Exception("UserName already in use");
+            }
+            if (await CheckPhoneExistsAsync(model.PhoneNumber))
             {
                 throw new Exception("UserName already in use");
             }
@@ -186,6 +191,10 @@ namespace LearnCSharp.Infrastructure.Identity
         {
             var user = await _userManager.FindByNameAsync(userName);
             return user != null;
+        }
+        public async Task<bool> CheckPhoneExistsAsync(string phoneNumber)
+        {
+            return await _userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
         }
     }
 }
