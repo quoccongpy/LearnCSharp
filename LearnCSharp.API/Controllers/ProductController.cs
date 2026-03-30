@@ -46,7 +46,7 @@ namespace LearnCSharp.API.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductUpdateDTO model)
         {
             try
@@ -60,7 +60,7 @@ namespace LearnCSharp.API.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             try

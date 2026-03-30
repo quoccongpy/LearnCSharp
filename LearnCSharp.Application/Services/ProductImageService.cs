@@ -1,4 +1,4 @@
-﻿using LearnCSharp.Application.Interfaces;
+using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models.DTOs.ProductImage;
 using LearnCSharp.Domain.Interfaces;
 
@@ -15,19 +15,9 @@ namespace LearnCSharp.Application.Services
 
         public async Task DeleteAsync(int id)
         {
-            var product = await _unitOfWork.ProductImage.GetByfilterAsync(a => a.ProductId == id);
-            try
-            {
-                await _unitOfWork.BeginTransactionAsync();
-                await _unitOfWork.ProductImage.RemoveAsync(product);
-                await _unitOfWork.CompleteAsync();
-                await _unitOfWork.CommitTransactionAsync();
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+            var productImage = await _unitOfWork.ProductImage.GetByfilterAsync(a => a.Id == id);
+            await _unitOfWork.ProductImage.RemoveAsync(productImage);
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task<IEnumerable<ProductImageDTO>> GetListProductImageByIdAsync(int id)

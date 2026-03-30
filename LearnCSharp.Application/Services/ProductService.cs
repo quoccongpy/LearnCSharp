@@ -1,4 +1,4 @@
-﻿using LearnCSharp.Application.Interfaces;
+using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models;
 using LearnCSharp.Application.Models.DTOs.Product;
 using LearnCSharp.Domain.Entities;
@@ -140,18 +140,18 @@ namespace LearnCSharp.Application.Services
                 product.Description = model.Description ?? product.Description;
                 product.CategoryId = model.CategoryId ?? product.CategoryId;
                 product.UpdatedDate = DateTime.UtcNow;
-                if (model.Thumbnaill != null)
+                if (model.Thumbnail != null)
                 {
                     if (!string.IsNullOrEmpty(product.Thumbnail))
                     {
                         _imageService.DeleteImage(product.Thumbnail);
                     }
-                    product.Thumbnail = await _imageService.UploadImageAsync(model.Thumbnaill);
+                    product.Thumbnail = await _imageService.UploadImageAsync(model.Thumbnail);
                 }
                 _unitOfWork.Product.Update(product);
                 await _unitOfWork.CompleteAsync();
 
-                if (model.Image != null && model.Image.Count > 0 || model.ListRetainIdsImage != null)
+                if (model.Images != null && model.Images.Count > 0 || model.ListRetainIdsImage != null)
                 {
                     var currentImages = await _productImageService.GetListProductImageByIdAsync(id);
                     var retainIdsImage = model.ListRetainIdsImage ?? new List<int>();
@@ -163,12 +163,12 @@ namespace LearnCSharp.Application.Services
                             await _productImageService.DeleteAsync(image.Id);
                         }
                     }
-                    if (model.Image != null && model.Image.Count > 0)
+                    if (model.Images != null && model.Images.Count > 0)
                     {
                         var uploadedPaths = new List<string>();
                         try
                         {
-                            uploadedPaths = await _imageService.UploadMultipleImageAsync(model.Image);
+                            uploadedPaths = await _imageService.UploadMultipleImageAsync(model.Images);
                             foreach (var path in uploadedPaths)
                             {
                                 var dataProductImage = new ProductImage()
@@ -178,6 +178,7 @@ namespace LearnCSharp.Application.Services
                                 };
                                 await _unitOfWork.ProductImage.CreateAsync(dataProductImage);
                             }
+                            await _unitOfWork.CompleteAsync();
                         }
                         catch (Exception ex)
                         {
