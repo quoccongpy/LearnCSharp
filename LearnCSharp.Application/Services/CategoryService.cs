@@ -16,19 +16,12 @@ namespace LearnCSharp.Application.Services
 
         public async Task CreateAsync(CategoryDTO model)
         {
-            try
+            var data = new Category()
             {
-                var data = new Category()
-                {
-                    Name = model.Name
-                };
-                await _unitOfWork.Category.CreateAsync(data);
-                await _unitOfWork.CompleteAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+                Name = model.Name
+            };
+            await _unitOfWork.Category.CreateAsync(data);
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task DeleteAsync(int id)
@@ -82,7 +75,7 @@ namespace LearnCSharp.Application.Services
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw;
             }
         }
     }

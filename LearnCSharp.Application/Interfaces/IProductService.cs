@@ -9,7 +9,7 @@ namespace LearnCSharp.Application.Interfaces
 
         Task Update(int id, ProductUpdateDTO model);
 
-        Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10);
+        Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int? categoryId, int pageIndex = 1, int pageSize = 10);
 
         Task<ProductDTO> GetByIdAsync(int id);
 

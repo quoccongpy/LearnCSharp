@@ -7,21 +7,21 @@ using LearnCSharp.Infrastructure;
 using LearnCSharp.Infrastructure.Identity;
 using LearnCSharp.Infrastructure.Persistence.ConfigOptions;
 using LearnCSharp.Infrastructure.Persistence.Repositories;
+using LearnCSharp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
-using Microsoft.OpenApi.Models;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var LearnCSharpCorsPolicy = "LearnCSharpCorsPolicy";
 var configuration = builder.Configuration;
-
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -34,7 +34,6 @@ builder.Services.AddControllers()
 builder.Services.AddDbContext<LearnCSharpDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 builder.Services.AddCors(o => o.AddPolicy(LearnCSharpCorsPolicy, builder =>
 {
     builder.AllowAnyMethod()
@@ -43,15 +42,7 @@ builder.Services.AddCors(o => o.AddPolicy(LearnCSharpCorsPolicy, builder =>
         .AllowCredentials();
 }));
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddScoped<IProductImageService, ProductImageService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddInfrastructure();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -156,7 +147,6 @@ if (app.Environment.IsDevelopment())
         c.DisplayRequestDuration();
     });
 }
-
 
 app.UseGlobalExceptionHandling();
 app.UseCors(LearnCSharpCorsPolicy);

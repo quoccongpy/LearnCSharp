@@ -1,4 +1,6 @@
-﻿using LearnCSharp.Application.Interfaces;
+﻿using LearnCSharp.API.Mappers;
+using LearnCSharp.API.Models;
+using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models.DTOs.Product;
 using LearnCSharp.Application.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -18,9 +20,9 @@ namespace LearnCSharp.API.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProductPaging(string? keyword, int pageIndex = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProductPaging(string? keyword, int? categoryId, int pageIndex = 1, int pageSize = 10)
         {
-            var data = await _serviceProduct.GetAllProductPagingAsync(keyword, pageIndex, pageSize);
+            var data = await _serviceProduct.GetAllProductPagingAsync(keyword, categoryId, pageIndex, pageSize);
             return Ok(data);
         }
 
@@ -33,45 +35,26 @@ namespace LearnCSharp.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = SD.RoleAdmin)]
-        public async Task<IActionResult> CreateProduct([FromForm] ProductCreateDTO model)
+        public async Task<IActionResult> CreateProduct([FromForm] ProductCreateRequest request)
         {
-            try
-            {
-                await _serviceProduct.CreateAsync(model);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var dto = ProductMapper.ToDTO(request);
+            await _serviceProduct.CreateAsync(dto);
+            return Ok();
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductUpdateDTO model)
+        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductUpdateRequest request)
         {
-            try
-            {
-                await _serviceProduct.Update(id, model);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var dto = ProductMapper.ToDTO(request);
+            await _serviceProduct.Update(id, dto);
+            return Ok();
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            try
-            {
-                await _serviceProduct.DeleteAsync(id);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _serviceProduct.DeleteAsync(id);
+            return Ok();
         }
     }
 }
