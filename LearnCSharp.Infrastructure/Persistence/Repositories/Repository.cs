@@ -1,7 +1,5 @@
 ﻿using LearnCSharp.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace LearnCSharp.Infrastructure.Persistence.Repositories
@@ -54,36 +52,42 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        //public async Task<T> GetByIdAsync(Expression<Func<T, bool>> filter, bool tracked = true)
-        //{
-        //    IQueryable<T> query = _dbSet;
+        public async Task<T> GetByIdIncludeAsync(Expression<Func<T, bool>> filter, bool tracked = true, params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
+            }
 
-        //    if (!tracked)
-        //    {
-        //        query = query.AsNoTracking();
-        //    }
-
-        //    if (filter != null)
-        //    {
-        //        query = query.Where(filter);
-        //    }
-        //    return await query.FirstOrDefaultAsync();
-        //}
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return await query.FirstOrDefaultAsync();
+        }
 
         public async Task<T> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<(List<T> Data, int TotalCount)> GetPagedAsync(Expression<Func<T, bool>> filter, int skip, int take, 
+        public async Task<(List<T> Data, int TotalCount)> GetPagedAsync(Expression<Func<T, bool>> filter, int skip, int take,
                                                                         bool tracked = false, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
-            if(includes != null)
+            if (includes != null)
             {
-                foreach(var include in includes)
+                foreach (var include in includes)
                 {
-                    query=query.Include(include);
+                    query = query.Include(include);
                 }
             }
             if (filter != null)
@@ -99,9 +103,10 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             return (data, totalCount);
         }
 
-        public async Task RemoveAsync(T entity)
+        public Task RemoveAsync(T entity)
         {
             _dbSet.Remove(entity);
+            return Task.CompletedTask;
         }
     }
 }

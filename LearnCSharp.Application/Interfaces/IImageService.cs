@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using LearnCSharp.Application.Models;
 
 namespace LearnCSharp.Application.Interfaces
 {
     public interface IImageService
     {
-        Task<string> UploadImageAsync(IFormFile file);
+        Task<string> UploadImageAsync(FileUploadModel file);
 
-        Task<List<string>> UploadMultipleImageAsync(IList<IFormFile> files);
+        Task<List<string>> UploadMultipleImageAsync(IList<FileUploadModel> files);
 
         void DeleteImage(string thumbnailPath);
 

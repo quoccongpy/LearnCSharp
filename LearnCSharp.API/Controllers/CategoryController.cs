@@ -21,15 +21,8 @@ namespace LearnCSharp.API.Controllers
         [Authorize(Roles = SD.RoleAdmin)]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryDTO model)
         {
-            try
-            {
-                await _serviceCategory.CreateAsync(model);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _serviceCategory.CreateAsync(model);
+            return Ok();
         }
 
         [HttpGet]
@@ -49,29 +42,15 @@ namespace LearnCSharp.API.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDTO model)
         {
-            try
-            {
-                await _serviceCategory.Update(id, model);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _serviceCategory.Update(id, model);
+            return Ok();
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            try
-            {
-                await _serviceCategory.DeleteAsync(id);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _serviceCategory.DeleteAsync(id);
+            return Ok();
         }
     }
 }

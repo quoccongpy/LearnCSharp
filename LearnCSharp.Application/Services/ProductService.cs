@@ -1,6 +1,7 @@
 using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models;
 using LearnCSharp.Application.Models.DTOs.Product;
+using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
 using System.Linq.Expressions;
@@ -79,14 +80,12 @@ namespace LearnCSharp.Application.Services
             }
         }
 
-        public async Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10)
+        public async Task<PagedResult<ProductDTO>> GetAllProductPagingAsync(string? keyword, int? categoryId, int pageIndex = 1, int pageSize = 10)
         {
-            Expression<Func<Product, bool>> filter = null;
-            if (!string.IsNullOrEmpty(keyword))
-            {
-                filter = a => a.Name.Contains(keyword);
-            }
-            var (products, totalCount) = await _unitOfWork.Product.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize,false,includes:a=>a.Category);
+            pageIndex = pageIndex <= 0 ? 1 : pageIndex;
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+           
+            var (products, totalCount) = await _unitOfWork.Product.SearchAsync(keyword, categoryId,((pageIndex - 1) * pageSize), pageSize);
             var data = products.Select(a => new ProductDTO
             {
                 Id = a.Id,
@@ -109,7 +108,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task<ProductDTO> GetByIdAsync(int id)
         {
-            var product = await _unitOfWork.Product.GetByfilterAsync(a => a.Id == id);
+            var product = await _unitOfWork.Product.GetByIdIncludeAsync(a => a.Id == id, includes: a => a.Category);
 
             var dataProductImage = await _productImageService.GetListProductImageByIdAsync(id);
             var data = new ProductDTO()
@@ -120,6 +119,7 @@ namespace LearnCSharp.Application.Services
                 Thumbnail = product.Thumbnail,
                 Description = product.Description,
                 CategoryId = product.CategoryId,
+                CategoryName=product.Category.Name,
                 ProductImagesList = dataProductImage.ToList(),
             };
             return data;

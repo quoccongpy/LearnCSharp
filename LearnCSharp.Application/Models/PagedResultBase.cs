@@ -4,22 +4,7 @@
     {
         public int CurrentPage { get; set; }
 
-        public int PageCount
-        {
-            get
-            {
-                var pageCount = (double)RowCount / PageSize;
-                return (int)Math.Ceiling(pageCount);
-            }
-            set
-            {
-                if (value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-                PageCount = value;
-            }
-        }
+        public int PageCount => (int)Math.Ceiling((double)RowCount / PageSize);
 
         public int PageSize { get; set; }
         public int RowCount { get; set; }

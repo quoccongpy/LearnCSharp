@@ -1,8 +1,8 @@
 ﻿using LearnCSharp.Application.Interfaces;
+using LearnCSharp.Application.Models;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 
-namespace LearnCSharp.Application.Services
+namespace LearnCSharp.Infrastructure.Services
 {
     // largeFile :https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/mvc/models/file-uploads/samples/5.x/LargeFilesSample/Controllers/FileUploadController.cs?fbclid=IwY2xjawJrAzlleHRuA2FlbQIxMAABHuzqpb8QoJBzikX5F1kH13GcvqxvwU9aCs0DQEpycsGDYskm25yjXo8io69w_aem_NlvhpSmhwOqztYvmmHZpZA
     public class ImageService : IImageService
@@ -46,9 +46,9 @@ namespace LearnCSharp.Application.Services
             }
         }
 
-        public async Task<string> UploadImageAsync(IFormFile file)
+        public async Task<string> UploadImageAsync(FileUploadModel file)
         {
-            if (file == null || file.Length == 0)
+            if (file == null || file.FileStream.Length == 0)
             {
                 throw new ArgumentNullException(nameof(file));
             }
@@ -61,7 +61,7 @@ namespace LearnCSharp.Application.Services
             {
                 throw new ArgumentException("Invalid file type. Only .jpg, .jpeg, .png, .gif are allowed.");
             }
-            if (file.Length > 1 * 1024 * 1024)
+            if (file.FileStream.Length > 1 * 1024 * 1024)
             {
                 throw new ArgumentException("File size should not exceed 1MB");
             }
@@ -71,12 +71,12 @@ namespace LearnCSharp.Application.Services
             var filePath = Path.Combine(uploadFolder, fileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                await file.CopyToAsync(stream);
+                await file.FileStream.CopyToAsync(stream);
             }
             return $"/images/product/{fileName}";
         }
 
-        public async Task<List<string>> UploadMultipleImageAsync(IList<IFormFile> files)
+        public async Task<List<string>> UploadMultipleImageAsync(IList<FileUploadModel> files)
         {
             if (files == null || files.Count == 0)
             {
