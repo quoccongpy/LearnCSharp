@@ -18,5 +18,9 @@
         public const string Cancelled = "Cancelled";
 
         #endregion OrderStatus
+
+        #region cache
+        public const string CategoriesAll = "categories:all";
+        #endregion
     }
 }

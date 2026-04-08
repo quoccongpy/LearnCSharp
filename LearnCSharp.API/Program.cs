@@ -1,18 +1,15 @@
 using LearnCSharp.API;
 using LearnCSharp.API.Extensions;
-using LearnCSharp.Application.Interfaces;
-using LearnCSharp.Application.Services;
-using LearnCSharp.Domain.Interfaces;
 using LearnCSharp.Infrastructure;
 using LearnCSharp.Infrastructure.Identity;
 using LearnCSharp.Infrastructure.Persistence.ConfigOptions;
-using LearnCSharp.Infrastructure.Persistence.Repositories;
 using LearnCSharp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
@@ -41,6 +38,12 @@ builder.Services.AddCors(o => o.AddPolicy(LearnCSharpCorsPolicy, builder =>
         .WithOrigins(configuration["AllowedOrigins"])
         .AllowCredentials();
 }));
+
+//redis cache
+var cacheConfig = builder.Configuration.GetSection("Cache");
+var redisConnection = cacheConfig["RedisConnection"];
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(redisConnection));
 
 builder.Services.AddInfrastructure();
 
