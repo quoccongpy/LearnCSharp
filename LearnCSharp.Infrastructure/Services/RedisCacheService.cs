@@ -22,7 +22,7 @@ namespace LearnCSharp.Infrastructure.Services
             return JsonSerializer.Deserialize<T>(value);
         }
 
-        public async Task RemoveAsync<T>(string cacheKey)
+        public async Task RemoveAsync(string cacheKey)
         {
             await _db.KeyDeleteAsync(cacheKey);
         }

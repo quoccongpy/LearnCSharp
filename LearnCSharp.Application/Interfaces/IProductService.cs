@@ -14,5 +14,6 @@ namespace LearnCSharp.Application.Interfaces
         Task<ProductDTO> GetByIdAsync(int id);
 
         Task DeleteAsync(int id);
+        Task<List<ProductDTO>> GetByCategoryAsync(int categoryId, int take);
     }
 }

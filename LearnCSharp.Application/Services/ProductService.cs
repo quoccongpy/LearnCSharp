@@ -1,10 +1,8 @@
 using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models;
 using LearnCSharp.Application.Models.DTOs.Product;
-using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
-using System.Linq.Expressions;
 
 namespace LearnCSharp.Application.Services
 {
@@ -84,8 +82,8 @@ namespace LearnCSharp.Application.Services
         {
             pageIndex = pageIndex <= 0 ? 1 : pageIndex;
             pageSize = pageSize <= 0 ? 10 : pageSize;
-           
-            var (products, totalCount) = await _unitOfWork.Product.SearchAsync(keyword, categoryId,((pageIndex - 1) * pageSize), pageSize);
+
+            var (products, totalCount) = await _unitOfWork.Product.SearchAsync(keyword, categoryId, ((pageIndex - 1) * pageSize), pageSize);
             var data = products.Select(a => new ProductDTO
             {
                 Id = a.Id,
@@ -94,7 +92,7 @@ namespace LearnCSharp.Application.Services
                 Thumbnail = a.Thumbnail,
                 Description = a.Description,
                 CategoryId = a.CategoryId,
-                CategoryName=a.Category.Name,
+                CategoryName = a.Category.Name,
             }).ToList();
             var result = new PagedResult<ProductDTO>
             {
@@ -104,6 +102,22 @@ namespace LearnCSharp.Application.Services
                 PageSize = pageSize
             };
             return result;
+        }
+
+        public async Task<List<ProductDTO>> GetByCategoryAsync(int categoryId, int take)
+        {
+            var data = await _unitOfWork.Product.GetAsync(a => a.CategoryId == categoryId,
+                                                          a => new ProductDTO
+                                                          {
+                                                              Id = a.Id,
+                                                              Name = a.Name,
+                                                              Price = a.Price,
+                                                              Thumbnail = a.Thumbnail,
+                                                              Description = a.Description,
+                                                          },
+                                                          take: take,
+                                                          tracked: false);
+            return data;
         }
 
         public async Task<ProductDTO> GetByIdAsync(int id)
@@ -119,7 +133,7 @@ namespace LearnCSharp.Application.Services
                 Thumbnail = product.Thumbnail,
                 Description = product.Description,
                 CategoryId = product.CategoryId,
-                CategoryName=product.Category.Name,
+                CategoryName = product.Category.Name,
                 ProductImagesList = dataProductImage.ToList(),
             };
             return data;

@@ -1,4 +1,4 @@
-﻿using LearnCSharp.API.Mappers;
+using LearnCSharp.API.Mappers;
 using LearnCSharp.API.Models;
 using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models.DTOs.Product;
@@ -55,6 +55,12 @@ namespace LearnCSharp.API.Controllers
         {
             await _serviceProduct.DeleteAsync(id);
             return Ok();
+        }
+        [HttpGet("by-category/{categoryId:int}")]
+        public async Task<ActionResult<List<ProductDTO>>> GetByCategory(int categoryId, int take = 50)
+        {
+            var data = await _serviceProduct.GetByCategoryAsync(categoryId, take);
+            return Ok(data);
         }
     }
 }
