@@ -1,6 +1,7 @@
-﻿using LearnCSharp.Domain.Interfaces;
+using LearnCSharp.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LearnCSharp.Infrastructure.Persistence.Repositories
 {
@@ -21,9 +22,16 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             await _dbSet.AddAsync(entity);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> filter = null, bool tracked = true)
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> filter = null, bool tracked = true, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
             if (!tracked)
             {
                 query = query.AsNoTracking();
@@ -107,6 +115,24 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
         {
             _dbSet.Remove(entity);
             return Task.CompletedTask;
+        }
+
+        public async Task<List<TResult>> GetAsync<TResult>(Expression<Func<T, bool>> filter, Expression<Func<T, TResult>> selector, int? take = null, bool tracked = true)
+        {
+            IQueryable<T> query = _dbSet;
+            if (!tracked)
+            {
+                query = query.AsNoTracking();
+            }
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (take.HasValue)
+            {
+                query = query.Take(take.Value);
+            }
+            return await query.Select(selector).ToListAsync();
         }
     }
 }

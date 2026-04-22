@@ -1,4 +1,5 @@
-﻿using LearnCSharp.Domain.Entities;
+﻿using LearnCSharp.Application.Models.DTOs.Product;
+using LearnCSharp.Domain.Entities;
 using LearnCSharp.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
