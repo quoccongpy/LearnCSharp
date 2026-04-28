@@ -22,6 +22,8 @@ namespace LearnCSharp.Infrastructure
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IRedisCacheService, RedisCacheService>();
+            services.AddScoped<ICrustService, CrustService>();
+            services.AddScoped<ISizeService, SizeService>();
             return services;
         }
     }

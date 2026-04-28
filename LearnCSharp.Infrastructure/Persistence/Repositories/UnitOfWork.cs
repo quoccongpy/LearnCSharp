@@ -18,6 +18,8 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             RefreshToken = new RefreshTokenRepository(context);
             Order = new OrderRepository(context);
             OrderDetail = new OrderDetailRepository(context);
+            Size = new SizeRepository(context);
+            Crust = new CrustRepository(context);
         }
 
         public ICategoryRepository Category { get; private set; }
@@ -26,6 +28,8 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
         public IRefreshTokenRepository RefreshToken { get; private set; }
         public IOrderRepository  Order { get; private set; }
         public IOrderDetailRepository  OrderDetail { get; private set; }
+        public ISizeRepository  Size { get; private set; }
+        public ICrustRepository Crust { get; private set; }
 
         public async Task BeginTransactionAsync()
         {

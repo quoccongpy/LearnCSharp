@@ -31,26 +31,23 @@ namespace LearnCSharp.Application.Services
         public async Task DeleteAsync(int id)
         {
             var category = await _unitOfWork.Category.GetByfilterAsync(a => a.Id == id);
-            try
+            if (category == null)
             {
-                await _unitOfWork.Category.RemoveAsync(category);
-                await _unitOfWork.CompleteAsync();
-                await _redisCacheService.RemoveAsync(SD.CategoriesAll);
+                throw new KeyNotFoundException($"Category with ID {id} not found.");
             }
-            catch
-            {
-                throw;
-            }
+            await _unitOfWork.Category.RemoveAsync(category);
+            await _unitOfWork.CompleteAsync();
+            await _redisCacheService.RemoveAsync(SD.CategoriesAll);
         }
 
         public async Task<IEnumerable<CategoryListItemDTO>> GetAllCategoryAsync()
         {
             var cacheKey = SD.CategoriesAll;
-            var cached=await _redisCacheService.GetAsync<List<CategoryListItemDTO>>(cacheKey);
+            var cached = await _redisCacheService.GetAsync<List<CategoryListItemDTO>>(cacheKey);
             if (cached != null)
             {
                 return cached;
-            }    
+            }
             var category = await _unitOfWork.Category.GetAllAsync();
             var data = category.Select(a => new CategoryListItemDTO()
             {
@@ -64,6 +61,10 @@ namespace LearnCSharp.Application.Services
         public async Task<CategoryListItemDTO> GetByIdAsync(int id)
         {
             var category = await _unitOfWork.Category.GetByfilterAsync(a => a.Id == id);
+            if (category == null)
+            {
+                throw new KeyNotFoundException($"Category with ID {id} not found.");
+            }
             var data = new CategoryListItemDTO()
             {
                 Id = category.Id,
@@ -80,16 +81,9 @@ namespace LearnCSharp.Application.Services
                 throw new InvalidOperationException($"Categorty with ID {id} not found.");
             };
             category.Name = model.Name;
-            try
-            {
-                _unitOfWork.Category.Update(category);
-                await _unitOfWork.CompleteAsync();
-                await _redisCacheService.RemoveAsync(SD.CategoriesAll);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            _unitOfWork.Category.Update(category);
+            await _unitOfWork.CompleteAsync();
+            await _redisCacheService.RemoveAsync(SD.CategoriesAll);
         }
     }
 }

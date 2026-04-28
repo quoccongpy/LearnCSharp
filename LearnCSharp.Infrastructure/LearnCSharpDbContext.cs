@@ -19,6 +19,9 @@ namespace LearnCSharp.Infrastructure
         public DbSet<Product> Product { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; }
         public DbSet<ProductImage> ProductImage { get; set; }
+        public DbSet<Crust> Crust { get; set; }
+        public DbSet<Size> Size { get; set; }
+        public DbSet<ProductVariant> ProductVariant { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -26,8 +29,9 @@ namespace LearnCSharp.Infrastructure
             {
                 optionsBuilder.UseLazyLoadingProxies(false);
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            }    
+            }
         }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ConfigureIdentityTables();
@@ -37,6 +41,9 @@ namespace LearnCSharp.Infrastructure
             builder.ApplyConfiguration(new OrderConfiguration());
             builder.ApplyConfiguration(new RefreshTokenConfiguration());
             builder.ApplyConfiguration(new ProductImageConfiguration());
+            builder.ApplyConfiguration(new SizeConfiguration());
+            builder.ApplyConfiguration(new CrustConfiguration());
+            builder.ApplyConfiguration(new ProductVariantConfiguration());
 
             base.OnModelCreating(builder);
         }

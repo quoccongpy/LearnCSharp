@@ -8,6 +8,8 @@
         IRefreshTokenRepository  RefreshToken { get; }
         IOrderRepository Order { get; }
         IOrderDetailRepository OrderDetail { get; }
+        ISizeRepository Size { get; }
+        ICrustRepository Crust { get; }
 
         Task<int> CompleteAsync();
 
