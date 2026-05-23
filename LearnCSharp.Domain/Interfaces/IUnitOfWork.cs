@@ -10,6 +10,7 @@
         IOrderDetailRepository OrderDetail { get; }
         ISizeRepository Size { get; }
         ICrustRepository Crust { get; }
+        IProductVariantRepository ProductVariant { get; }
 
         Task<int> CompleteAsync();
 

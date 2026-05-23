@@ -24,6 +24,7 @@ namespace LearnCSharp.Infrastructure
             services.AddScoped<IRedisCacheService, RedisCacheService>();
             services.AddScoped<ICrustService, CrustService>();
             services.AddScoped<ISizeService, SizeService>();
+            services.AddScoped<IProductVariantService, ProductVariantService>();
             return services;
         }
     }
