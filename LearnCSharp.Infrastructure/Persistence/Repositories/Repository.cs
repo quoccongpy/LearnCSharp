@@ -1,7 +1,6 @@
 using LearnCSharp.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LearnCSharp.Infrastructure.Persistence.Repositories
 {

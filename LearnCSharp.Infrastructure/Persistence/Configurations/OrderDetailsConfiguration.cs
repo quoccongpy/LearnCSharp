@@ -16,6 +16,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
             builder.Property(a => a.Price).HasColumnName("price");
             builder.Property(a => a.Quantity).HasColumnName("quantity");
             builder.Property(a => a.Total).HasColumnName("total");
+            builder.Property(a => a.ProductVariantId).HasColumnName("product_variant_id").IsRequired(false);
             //builder.Property(a => a.Color).HasColumnName("color").HasMaxLength(20);
         }
     }

@@ -20,6 +20,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             OrderDetail = new OrderDetailRepository(context);
             Size = new SizeRepository(context);
             Crust = new CrustRepository(context);
+            ProductVariant = new ProductVariantRepository(context);
         }
 
         public ICategoryRepository Category { get; private set; }
@@ -30,6 +31,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
         public IOrderDetailRepository  OrderDetail { get; private set; }
         public ISizeRepository  Size { get; private set; }
         public ICrustRepository Crust { get; private set; }
+        public IProductVariantRepository ProductVariant { get; private set; }
 
         public async Task BeginTransactionAsync()
         {
