@@ -74,7 +74,9 @@ namespace LearnCSharp.Application.Services
                 SizeName = pv.Size.Name,
                 CrustName = pv.Crust.Name,
                 Price = pv.Price,
-            }).ToList();
+                SizeId= pv.SizeId,
+                CrustId= pv.CrustId,
+            }).OrderByDescending(a=>a.Id).ToList();
         }
 
         public async Task<List<ProductSimpleDTO>> GetProductsWithVariantAsync()
