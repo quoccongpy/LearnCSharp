@@ -43,7 +43,6 @@ namespace LearnCSharp.Application.Services
                     ShippingAddress = model.ShippingAddress,
                     PaymentMethod = model.PaymentMethod,
                     UserId = userId,
-                    IsActive = true,
                 };
                 double totalMoney = 0;
                 var orderDetails = new List<OrderDetails>();
@@ -62,7 +61,7 @@ namespace LearnCSharp.Application.Services
                     {
                         ProductId = product.Id,
                         Quantity = item.Quantity,
-                        Price = product.Price,
+                        UnitPrice = product.Price,
                         Total = product.Price * item.Quantity,
                         //Color = item.Color
                     };
@@ -108,7 +107,6 @@ namespace LearnCSharp.Application.Services
                 await _unitOfWork.BeginTransactionAsync();
 
                 order.Status = SD.Cancelled;
-                order.IsActive = false;
 
                 _unitOfWork.Order.Update(order);
                 await _unitOfWork.CompleteAsync();

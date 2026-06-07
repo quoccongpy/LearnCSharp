@@ -12,10 +12,10 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
             builder.HasKey(a => a.Id);
             builder.Property(a => a.Id).HasColumnName("id");
             builder.Property(a => a.UserId).HasColumnName("user_id").HasColumnType("uuid");
-            builder.Property(a => a.FullName).HasColumnName("FullName").HasColumnType("TEXT");
-            builder.Property(a => a.Email).HasColumnName("Email").HasColumnType("TEXT");
-            builder.Property(a => a.PhoneNumber).HasColumnName("PhoneNumber").HasColumnType("TEXT");
-            builder.Property(a => a.Address).HasColumnName("Address").HasColumnType("TEXT");
+            builder.Property(a => a.FullName).HasColumnName("full_name").HasColumnType("TEXT");
+            builder.Property(a => a.Email).HasColumnName("email").HasColumnType("TEXT");
+            builder.Property(a => a.PhoneNumber).HasColumnName("phone_number").HasColumnType("TEXT");
+            builder.Property(a => a.Address).HasColumnName("address").HasColumnType("TEXT");
             builder.Property(a => a.Note).HasColumnName("note").HasMaxLength(100);
             builder.Property(a => a.OrderDate).HasColumnName("ordate_date").HasColumnType("TIMESTAMP").IsRequired(false);
             builder.Property(a => a.Status).HasColumnName("status").HasMaxLength(50);
@@ -25,7 +25,6 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
             builder.Property(a => a.ShippingAddress).HasColumnName("shipping_address").HasMaxLength(200);
             builder.Property(a => a.ShippingDate).HasColumnName("shipping_date").HasColumnType("TIMESTAMP");
             builder.Property(a => a.PaymentMethod).HasColumnName("payment_method").HasMaxLength(100);
-            builder.Property(a => a.IsActive).HasColumnName("is_active");
         }
     }
 }

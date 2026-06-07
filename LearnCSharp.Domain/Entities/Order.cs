@@ -15,7 +15,6 @@
         public string ShippingAddress { get; set; }
         public DateTime ShippingDate { get; set; }
         public string PaymentMethod { get; set; }
-        public bool IsActive { get; set; }
         public Guid UserId { get; set; }
         public int TotalItem { get; set; }
         public ICollection<OrderDetails> OrderDetails { get; set; }
