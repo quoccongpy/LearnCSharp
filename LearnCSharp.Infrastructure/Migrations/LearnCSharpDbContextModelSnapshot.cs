@@ -22,69 +22,6 @@ namespace LearnCSharp.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("LearnCSharp.Domain.Entities.Cart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("cart", (string)null);
-                });
-
-            modelBuilder.Entity("LearnCSharp.Domain.Entities.CartItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CartId")
-                        .HasColumnType("integer")
-                        .HasColumnName("cart_id");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(72)
-                        .HasColumnType("character varying(72)")
-                        .HasColumnName("note");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer")
-                        .HasColumnName("product_id");
-
-                    b.Property<int?>("ProductVariantId")
-                        .HasColumnType("integer")
-                        .HasColumnName("product_variant_id");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("CartId", "ProductId", "ProductVariantId", "Note")
-                        .IsUnique();
-
-                    b.ToTable("cart_item", (string)null);
-                });
-
             modelBuilder.Entity("LearnCSharp.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -640,32 +577,6 @@ namespace LearnCSharp.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("LearnCSharp.Domain.Entities.CartItem", b =>
-                {
-                    b.HasOne("LearnCSharp.Domain.Entities.Cart", "Cart")
-                        .WithMany("CartItems")
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LearnCSharp.Domain.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LearnCSharp.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Cart");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("ProductVariant");
-                });
-
             modelBuilder.Entity("LearnCSharp.Domain.Entities.OrderDetails", b =>
                 {
                     b.HasOne("LearnCSharp.Domain.Entities.Order", "Order")
@@ -778,11 +689,6 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("LearnCSharp.Domain.Entities.Cart", b =>
-                {
-                    b.Navigation("CartItems");
                 });
 
             modelBuilder.Entity("LearnCSharp.Domain.Entities.Category", b =>
