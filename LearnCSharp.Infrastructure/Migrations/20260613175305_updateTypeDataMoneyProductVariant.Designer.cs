@@ -3,6 +3,7 @@ using System;
 using LearnCSharp.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LearnCSharp.Infrastructure.Migrations
 {
     [DbContext(typeof(LearnCSharpDbContext))]
-    partial class LearnCSharpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260613175305_updateTypeDataMoneyProductVariant")]
+    partial class updateTypeDataMoneyProductVariant
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,28 +157,19 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("TIMESTAMP")
                         .HasColumnName("ordate_date");
 
-                    b.Property<string>("PaymentIntentId")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("payment_intentid");
-
                     b.Property<string>("PaymentMethod")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("payment_method");
 
-                    b.Property<string>("PaymentStatus")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("payment_status");
-
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("TEXT")
                         .HasColumnName("phone_number");
 
-                    b.Property<DateTime>("ScheduledTime")
-                        .HasColumnType("TIMESTAMP")
-                        .HasColumnName("scheduled_time");
+                    b.Property<string>("ShippingAddress")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("shipping_address");
 
                     b.Property<DateTime>("ShippingDate")
                         .HasColumnType("TIMESTAMP")

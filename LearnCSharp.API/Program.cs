@@ -46,11 +46,11 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(redisConnection));
 
 builder.Services.AddInfrastructure();
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 
 builder.Services.AddHttpContextAccessor();
 
-//builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
-//builder.Services.AddScoped<RoleManager<AppRole>, RoleManager<AppRole>>();
 
 builder.Services.AddIdentity<AppUser, AppRole>(options =>
 {

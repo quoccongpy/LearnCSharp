@@ -7,7 +7,7 @@
         public string ProductName { get; set; }
         public string SizeName { get; set; }
         public string CrustName { get; set; }
-        public float Price { get; set; }
+        public decimal Price { get; set; }
         public int SizeId { get; set; }
         public int CrustId { get; set; }
     }

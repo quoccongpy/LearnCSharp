@@ -76,8 +76,12 @@ namespace LearnCSharp.Infrastructure.Identity
                 {
                     throw new Exception("Access is Invalid");
                 }
-                var userName = principal.Identity.Name;
-                var user= await _userManager.FindByNameAsync(userName);
+                var userIdString = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+                {
+                    throw new UnauthorizedAccessException("Invalid user claim");
+                }
+                var user = await _userManager.FindByIdAsync(userIdString);
                 if (user == null || !user.IsActive)
                 {
                     throw new Exception("User does not exist or is locked");
@@ -141,6 +145,10 @@ namespace LearnCSharp.Infrastructure.Identity
             var listClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name,user.UserName),
+                new Claim(ClaimTypes.Email,user.Email),
+                new Claim(ClaimTypes.GivenName,user.FullName),
+                new Claim(ClaimTypes.MobilePhone,user.PhoneNumber),
+                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
             };
             var roles = await _userManager.GetRolesAsync(user);
             foreach (var role in roles)
@@ -173,7 +181,7 @@ namespace LearnCSharp.Infrastructure.Identity
             {
                 Token = tokenString,
                 UserId = userId,
-                ExpiryDate = DateTime.Now.AddHours(_jwtTokenSettings.ExpireInHours),
+                ExpiryDate = DateTime.Now.AddDays(7),
                 CreatedDate = DateTime.Now,
                 IsRevoked = false,
             };

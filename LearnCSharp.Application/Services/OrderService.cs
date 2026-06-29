@@ -21,7 +21,7 @@ namespace LearnCSharp.Application.Services
             _userService = userService;
         }
 
-        public async Task CreateAsync(OrderCreateDTO model)
+        public async Task<int> CreateAsync(OrderCreateDTO model)
         {
             try
             {
@@ -39,12 +39,14 @@ namespace LearnCSharp.Application.Services
                     Note = model.Note,
                     OrderDate = DateTime.UtcNow,
                     Status = SD.Pending,
-                    ShippingMethod = model.ShippingMethod,
-                    ShippingAddress = model.ShippingAddress,
+                    //ShippingMethod = model.ShippingMethod,
                     PaymentMethod = model.PaymentMethod,
+                    PaymentStatus=SD.PaymentPending,
+                    ScheduledTime=model.ScheduledTime,
                     UserId = userId,
                 };
-                double totalMoney = 0;
+                decimal totalMoney = 0;
+                int totalItem = 0;
                 var orderDetails = new List<OrderDetails>();
                 foreach (var item in model.OrderDetails)
                 {
@@ -53,27 +55,41 @@ namespace LearnCSharp.Application.Services
                     {
                         throw new Exception($"Product with ID {item.ProductId} does not exist");
                     }
-                    //if (product.StockQuantity < item.Quantity)
-                    //{
-                    //    throw new Exception($"Product '{product.Name}' has only {product.StockQuantity} products left in stock");
-                    //}
+                    decimal unitPrice = product.Price;
+                    string sizeName = null;
+                    string crustName = null;
+                    if(item.ProductVariantId.HasValue)
+                    {
+                        var variant = await _unitOfWork.ProductVariant.GetByIdAsync(item.ProductVariantId.Value);
+                        if (variant != null)
+                        {
+                            unitPrice = variant.Price;
+                            sizeName = item.SizeName;
+                            crustName = item.CrustName;
+                        }
+                    }
                     var orderDetail = new OrderDetails()
                     {
                         ProductId = product.Id,
+                        ProductVariantId = item.ProductVariantId,
                         Quantity = item.Quantity,
                         UnitPrice = product.Price,
-                        Total = product.Price * item.Quantity,
-                        //Color = item.Color
+                        ProductName = product.Name,
+                        SizeName = sizeName,
+                        CrustName = crustName,
+                        Note = item.Note,
+                        Total = unitPrice * item.Quantity,
                     };
                     orderDetails.Add(orderDetail);
                     totalMoney += orderDetail.Total;
-                    //product.StockQuantity -= item.Quantity;
+                    totalItem += item.Quantity;
                 }
                 order.TotalMoney = totalMoney;
+                order.TotalItem = totalItem;
 
                 await _unitOfWork.BeginTransactionAsync();
                 await _unitOfWork.Order.CreateAsync(order);
-
+                await _unitOfWork.CompleteAsync();
                 foreach (var detail in orderDetails)
                 {
                     detail.OrderId = order.Id;
@@ -81,6 +97,7 @@ namespace LearnCSharp.Application.Services
                 }
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
+                return order.Id;
             }
             catch
             {
@@ -164,7 +181,6 @@ namespace LearnCSharp.Application.Services
                 OrderDate = order.OrderDate,
                 Status = order.Status,
                 TotalMoney = order.TotalMoney,
-                ShippingAddress = order.ShippingAddress,
                 PaymentMethod = order.PaymentMethod,
                 UserName = user.UserName,
                 OrderDetails = await GetOrderDetailsByOrderIdAsync(id),
@@ -210,7 +226,6 @@ namespace LearnCSharp.Application.Services
                         Quantity = item.Quantity,
                         Price = product.Price,
                         ProductName = product.Name,
-                        ProductThumbnail = product.Thumbnail,
                     });
                 }
             }

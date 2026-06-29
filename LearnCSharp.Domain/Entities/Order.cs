@@ -10,11 +10,13 @@
         public string Note { get; set; }
         public DateTime? OrderDate { get; set; }
         public string Status { get; set; }
-        public double TotalMoney { get; set; }
+        public decimal TotalMoney { get; set; }
         public string ShippingMethod { get; set; }
-        public string ShippingAddress { get; set; }
         public DateTime ShippingDate { get; set; }
+        public DateTime ScheduledTime { get; set; }
         public string PaymentMethod { get; set; }
+        public string PaymentStatus{ get; set; }
+        public string PaymentIntentId{ get; set; }
         public Guid UserId { get; set; }
         public int TotalItem { get; set; }
         public ICollection<OrderDetails> OrderDetails { get; set; }
