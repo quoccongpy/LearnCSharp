@@ -19,8 +19,26 @@
 
         #endregion OrderStatus
 
+        #region PaymentStatus
+
+        public const string PaymentPending = "Pending";
+        public const string PaymenPaid = "Paid";
+        public const string PaymenFailed = "Failed";
+        public const string PaymenRefunded = "Refunded";
+
+        #endregion PaymentStatus
+
+        #region StripeMetadataKeys
+
+        public const string StripeMetadataKeysOrderId = "orderId";
+        public const string StripeMetadataKeysUserId = "userId";
+
+        #endregion StripeMetadataKeys
+
         #region cache
+
         public const string CategoriesAll = "categories:all";
-        #endregion
+
+        #endregion cache
     }
 }

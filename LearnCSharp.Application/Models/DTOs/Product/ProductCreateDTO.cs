@@ -3,7 +3,7 @@
     public class ProductCreateDTO
     {
         public string Name { get; set; }
-        public float Price { get; set; }
+        public decimal Price { get; set; }
         public FileUploadModel? Thumbnail { get; set; }
         public IList<FileUploadModel>? Images { get; set; }
         public string Description { get; set; }

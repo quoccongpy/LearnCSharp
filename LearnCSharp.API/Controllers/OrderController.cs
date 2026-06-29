@@ -1,11 +1,12 @@
 ﻿using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models.DTOs.Order;
 using LearnCSharp.Application.Models.DTOs.Product;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnCSharp.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/orders")]
     [ApiController]
     public class OrderController : ControllerBase
     {
@@ -17,12 +18,13 @@ namespace LearnCSharp.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromBody] OrderCreateDTO model)
+        [Authorize]
+        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDTO model)
         {
             try
             {
-                await _orderService.CreateAsync(model);
-                return Ok();
+                var orderId = await _orderService.CreateAsync(model);
+                return Ok(new { orderId });
             }
             catch (Exception ex)
             {

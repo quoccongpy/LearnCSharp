@@ -3,6 +3,7 @@ using System;
 using LearnCSharp.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LearnCSharp.Infrastructure.Migrations
 {
     [DbContext(typeof(LearnCSharpDbContext))]
-    partial class LearnCSharpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260623161002_updateOrderSnapshotFields")]
+    partial class updateOrderSnapshotFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -173,9 +176,10 @@ namespace LearnCSharp.Infrastructure.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("phone_number");
 
-                    b.Property<DateTime>("ScheduledTime")
-                        .HasColumnType("TIMESTAMP")
-                        .HasColumnName("scheduled_time");
+                    b.Property<string>("ShippingAddress")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("shipping_address");
 
                     b.Property<DateTime>("ShippingDate")
                         .HasColumnType("TIMESTAMP")
