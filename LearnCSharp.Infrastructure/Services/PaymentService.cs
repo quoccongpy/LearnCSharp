@@ -29,7 +29,7 @@ namespace LearnCSharp.Infrastructure.Services
             {
                 throw new ApplicationException("Order not found");
             }
-            if (order.PaymentStatus == SD.PaymenPaid)
+            if (order.PaymentStatus == SD.PaymentPaid)
             {
                 throw new ApplicationException("Order has already been paid.");
             }
@@ -54,7 +54,7 @@ namespace LearnCSharp.Infrastructure.Services
                     case "processing":
                         throw new ApplicationException("Payment is processing.");
                     case "succeeded":
-                        order.PaymentStatus = SD.PaymenPaid;
+                        order.PaymentStatus = SD.PaymentPaid;
                         _unitOfWork.Order.Update(order);
                         await _unitOfWork.CompleteAsync();
                         throw new InvalidOperationException("Order has already been paid and settled.");
@@ -107,13 +107,15 @@ namespace LearnCSharp.Infrastructure.Services
                     paymentIntent.Metadata.TryGetValue(SD.StripeMetadataKeysOrderId, out var orderIdStr);
                     int.TryParse(orderIdStr, out int orderId);
                     var order = await _unitOfWork.Order.GetByIdAsync(orderId);
-                    if (order.PaymentStatus == SD.PaymenPaid)
+                    if (order.PaymentStatus == SD.PaymentPaid)
                     {
                         return;
                     }
                     if (order != null)
                     {
-                        order.PaymentStatus = SD.PaymenPaid;
+                        order.PaymentStatus = SD.PaymentPaid;
+                        order.PaymentTransactionId = paymentIntent.Id;
+                        order.PaymentDate = DateTime.UtcNow;
                         order.Status = SD.Processing;
                         _unitOfWork.Order.Update(order);
                         await _unitOfWork.CompleteAsync();
@@ -130,7 +132,7 @@ namespace LearnCSharp.Infrastructure.Services
                     var order = await _unitOfWork.Order.GetByIdAsync(orderId);
                     if (order != null)
                     {
-                        order.PaymentStatus = SD.PaymenFailed;
+                        order.PaymentStatus = SD.PaymentFailed;
                         _unitOfWork.Order.Update(order);
                         await _unitOfWork.CompleteAsync();
                     }

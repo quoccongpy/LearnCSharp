@@ -48,6 +48,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
 builder.Services.AddInfrastructure();
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 Stripe.StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
+builder.Services.Configure<VnPaySettings>(builder.Configuration.GetSection("VNPaySettings"));
 
 builder.Services.AddHttpContextAccessor();
 
