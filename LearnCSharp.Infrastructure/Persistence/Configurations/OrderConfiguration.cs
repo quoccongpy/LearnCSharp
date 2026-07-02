@@ -19,6 +19,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
             builder.Property(a => a.Note).HasColumnName("note").HasMaxLength(100);
             builder.Property(a => a.OrderDate).HasColumnName("ordate_date").HasColumnType("TIMESTAMP").IsRequired(false);
             builder.Property(a => a.Status).HasColumnName("status").HasMaxLength(50);
+            builder.Property(a => a.PaymentTransactionId).HasColumnName("payment_transaction_id").HasMaxLength(150);
             builder.Property(a => a.TotalMoney).HasColumnName("total_money");
             builder.Property(a => a.TotalItem).HasColumnName("total_item");
             builder.Property(a => a.ShippingMethod).HasColumnName("shipping_method").HasMaxLength(100);
@@ -26,6 +27,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Configurations
             builder.Property(a => a.PaymentIntentId).HasColumnName("payment_intentid").HasMaxLength(100);
             builder.Property(a => a.ShippingDate).HasColumnName("shipping_date").HasColumnType("TIMESTAMP");
             builder.Property(a => a.ScheduledTime).HasColumnName("scheduled_time").HasColumnType("TIMESTAMP");
+            builder.Property(a => a.PaymentDate).HasColumnName("payment_date").HasColumnType("TIMESTAMP");
             builder.Property(a => a.PaymentMethod).HasColumnName("payment_method").HasMaxLength(100);
         }
     }

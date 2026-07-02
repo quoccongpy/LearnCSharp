@@ -22,8 +22,8 @@
         #region PaymentStatus
 
         public const string PaymentPending = "Pending";
-        public const string PaymenPaid = "Paid";
-        public const string PaymenFailed = "Failed";
+        public const string PaymentPaid = "Paid";
+        public const string PaymentFailed = "Failed";
         public const string PaymenRefunded = "Refunded";
 
         #endregion PaymentStatus
@@ -35,6 +35,11 @@
 
         #endregion StripeMetadataKeys
 
+        #region TypePayment
+        public const string OrderType = "other";
+        public const string VNPay = "vnpay";
+        public const string Stripe = "stripe";
+        #endregion
         #region cache
 
         public const string CategoriesAll = "categories:all";
