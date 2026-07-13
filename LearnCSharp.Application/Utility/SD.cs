@@ -32,18 +32,30 @@
 
         public const string StripeMetadataKeysOrderId = "orderId";
         public const string StripeMetadataKeysUserId = "userId";
+        public const string StripeMetadataKeysPaymentId = "paymentId";
 
         #endregion StripeMetadataKeys
 
         #region TypePayment
+
         public const string OrderType = "other";
         public const string VNPay = "vnpay";
         public const string Stripe = "stripe";
-        #endregion
+        public const string Paypal = "paypal";
+
+        #endregion TypePayment
+
         #region cache
 
         public const string CategoriesAll = "categories:all";
+        public const string CacheKeyPaypal = "PAYPAL_ACCESS_TOKEN";
 
         #endregion cache
+
+        #region PaypalPayment
+
+        public const string IntentPaypal = "CAPTURE";
+
+        #endregion PaypalPayment
     }
 }

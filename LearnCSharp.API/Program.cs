@@ -3,7 +3,6 @@ using LearnCSharp.API.Extensions;
 using LearnCSharp.Infrastructure;
 using LearnCSharp.Infrastructure.Identity;
 using LearnCSharp.Infrastructure.Persistence.ConfigOptions;
-using LearnCSharp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,9 +48,10 @@ builder.Services.AddInfrastructure();
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 Stripe.StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 builder.Services.Configure<VnPaySettings>(builder.Configuration.GetSection("VNPaySettings"));
+builder.Services.Configure<PayPalSettings>(builder.Configuration.GetSection("PaypalSettings"));
 
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddMemoryCache();
 
 builder.Services.AddIdentity<AppUser, AppRole>(options =>
 {

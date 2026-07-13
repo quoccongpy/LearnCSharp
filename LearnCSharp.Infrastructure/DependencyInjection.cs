@@ -26,9 +26,9 @@ namespace LearnCSharp.Infrastructure
             services.AddScoped<ISizeService, SizeService>();
             services.AddScoped<IProductVariantService, ProductVariantService>();
             services.AddHttpClient<IExchangeRateService, ExchangeRateService>();
-           // services.AddScoped<IExchangeRateService, ExchangeRateService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IVnPayService, VnPayService>();
+            services.AddScoped<IPayPalService, PayPalService>();
             return services;
         }
     }

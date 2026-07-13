@@ -11,11 +11,13 @@ namespace LearnCSharp.API.Controllers
     {
         private readonly IPaymentService _paymentService;
         private readonly IVnPayService _vnPayService;
+        private readonly IPayPalService _paypalService;
 
-        public PaymentController(IPaymentService paymentService, IVnPayService vnPayService)
+        public PaymentController(IPaymentService paymentService, IVnPayService vnPayService, IPayPalService paypalService)
         {
             _paymentService = paymentService;
             _vnPayService = vnPayService;
+            _paypalService = paypalService;
         }
 
         [HttpPost("stripe/create-payment-intent/{orderId}")]
@@ -46,17 +48,34 @@ namespace LearnCSharp.API.Controllers
         }
 
         [HttpGet("vnpay/return")]
-        public  IActionResult Return()
+        public IActionResult Return()
         {
-            var query = Request.Query.ToDictionary(x => x.Key,x => x.Value.ToString());
+            var query = Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString());
             var result = _vnPayService.PaymentExecute(query);
             return Ok(result);
         }
+
         [HttpGet("vnpay/ipn")]
         public async Task<IActionResult> Ipn()
         {
             var query = Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString());
             var result = await _vnPayService.ProcessIpnAsync(query);
+            return Ok(result);
+        }
+
+        [HttpPost("paypal/create-order/{orderId}")]
+        [Authorize]
+        public async Task<IActionResult> CreatePayPalOrder(int orderId)
+        {
+            var result = await _paypalService.CreatePayPalOrderAsync(orderId);
+            return Ok(result);
+        }
+
+        [HttpPost("paypal/capture/{paypalOrderId}")]
+        [Authorize]
+        public async Task<IActionResult> CapturePayPalPayment(string paypalOrderId)
+        {
+            var result = await _paypalService.CapturePaymentAsync(paypalOrderId);
             return Ok(result);
         }
     }

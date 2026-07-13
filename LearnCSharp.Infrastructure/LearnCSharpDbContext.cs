@@ -22,8 +22,7 @@ namespace LearnCSharp.Infrastructure
         public DbSet<Crust> Crust { get; set; }
         public DbSet<Size> Size { get; set; }
         public DbSet<ProductVariant> ProductVariant { get; set; }
-        public DbSet<Cart> Cart { get; set; }
-        public DbSet<CartItem> CartItem { get; set; }
+        public DbSet<Payment> Payment { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -46,8 +45,6 @@ namespace LearnCSharp.Infrastructure
             builder.ApplyConfiguration(new SizeConfiguration());
             builder.ApplyConfiguration(new CrustConfiguration());
             builder.ApplyConfiguration(new ProductVariantConfiguration());
-            builder.ApplyConfiguration(new CartConfiguration());
-            builder.ApplyConfiguration(new CartItemConfiguration());
 
             base.OnModelCreating(builder);
         }

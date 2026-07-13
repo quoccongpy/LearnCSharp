@@ -15,6 +15,7 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
+		<PackageReference Include="PayPal" Version="1.9.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.10.1" />
 		<PackageReference Include="Stripe.net" Version="52.0.0" />
 	</ItemGroup>
@@ -22,6 +23,10 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\LearnCSharp.Application\LearnCSharp.Application.csproj" />
 	  <ProjectReference Include="..\LearnCSharp.Domain\LearnCSharp.Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Payments\Paypal\" />
 	</ItemGroup>
 
 </Project>

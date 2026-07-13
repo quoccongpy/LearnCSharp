@@ -39,9 +39,6 @@ namespace LearnCSharp.Application.Services
                     Note = model.Note,
                     OrderDate = DateTime.UtcNow,
                     Status = SD.Pending,
-                    //ShippingMethod = model.ShippingMethod,
-                    PaymentMethod = model.PaymentMethod,
-                    PaymentStatus=SD.PaymentPending,
                     ScheduledTime=model.ScheduledTime,
                     UserId = userId,
                 };
@@ -151,7 +148,6 @@ namespace LearnCSharp.Application.Services
                 Note = a.Note,
                 OrderDate = a.OrderDate,
                 TotalMoney = a.TotalMoney,
-                PaymentMethod = a.PaymentMethod,
             }).ToList();
 
             var result = new PagedResult<OrderDTO>
@@ -181,7 +177,6 @@ namespace LearnCSharp.Application.Services
                 OrderDate = order.OrderDate,
                 Status = order.Status,
                 TotalMoney = order.TotalMoney,
-                PaymentMethod = order.PaymentMethod,
                 UserName = user.UserName,
                 OrderDetails = await GetOrderDetailsByOrderIdAsync(id),
             };
