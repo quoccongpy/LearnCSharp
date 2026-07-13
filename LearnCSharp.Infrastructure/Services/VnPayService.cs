@@ -6,6 +6,7 @@ using LearnCSharp.Domain.Interfaces;
 using LearnCSharp.Infrastructure.Payments.VNPay;
 using LearnCSharp.Infrastructure.Persistence.ConfigOptions;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace LearnCSharp.Infrastructure.Services
 {
@@ -22,15 +23,29 @@ namespace LearnCSharp.Infrastructure.Services
 
         public async Task<string> CreatePaymentUrl(int orderId, string ipAddress)
         {
-            var order = await _unitOfWork.Order.GetByIdAsync(orderId);
+            var order = await _unitOfWork.Order.GetByIdIncludeAsync(a => a.Id == orderId, includes: a => a.Payments);
             if (order == null)
             {
                 throw new ApplicationException("Order not found.");
             }
-            if (order.PaymentStatus == SD.PaymentPaid)
+            if (order.Status == SD.PaymentPaid || order.Status == SD.Processing)
             {
                 throw new ApplicationException("Order has already been paid.");
             }
+            var payment = order.Payments.FirstOrDefault(p => p.PaymentMethod == SD.VNPay && p.PaymentStatus == SD.PaymentPending);
+            if (payment == null)
+            {
+                payment = new Domain.Entities.Payment
+                {
+                    OrderId = order.Id,
+                    PaymentMethod = SD.VNPay,
+                    Amount = order.TotalMoney,
+                    PaymentStatus = SD.PaymentPending
+                };
+                await _unitOfWork.Payment.CreateAsync(payment);
+                await _unitOfWork.CompleteAsync(); 
+            }
+            string vnpTxnRef = $"{order.Id}_{payment.Id}";
             var vnPay = new VnPayLibrary();
             vnPay.AddRequestData("vnp_Version", _vnPaySettings.Version);
             vnPay.AddRequestData("vnp_Command", _vnPaySettings.Command);
@@ -44,14 +59,13 @@ namespace LearnCSharp.Infrastructure.Services
             vnPay.AddRequestData("vnp_OrderInfo", $"Thanh toan don hang: {orderId}");
             vnPay.AddRequestData("vnp_OrderType", SD.OrderType);
             vnPay.AddRequestData("vnp_ReturnUrl", _vnPaySettings.ReturnUrl);
-            vnPay.AddRequestData("vnp_TxnRef", order.Id.ToString());
+            vnPay.AddRequestData("vnp_TxnRef", vnpTxnRef);
             vnPay.AddRequestData("vnp_ExpireDate", DateTime.Now.AddMinutes(15).ToString("yyyyMMddHHmmss"));
             var paymentUrl = vnPay.CreateRequestUrl(_vnPaySettings.BaseUrl, _vnPaySettings.HashSecret);
-            order.PaymentStatus = SD.PaymentPending;
-            order.PaymentMethod = SD.VNPay.ToUpper();
-            _unitOfWork.Order.Update(order);
+
+            payment.GatewayOrderId = vnpTxnRef;
+            _unitOfWork.Payment.Update(payment);
             await _unitOfWork.CompleteAsync();
-            Console.WriteLine(paymentUrl);
             return paymentUrl;
         }
 
@@ -62,13 +76,10 @@ namespace LearnCSharp.Infrastructure.Services
             {
                 return new PaymentResultDTO { Success = false, Message = "Invalid signature." };
             }
-            if (!long.TryParse(vnPay.GetResponseData("vnp_TxnRef"), out var orderId))
+            string txnRef = vnPay.GetResponseData("vnp_TxnRef");
+            if (string.IsNullOrEmpty(txnRef) || !int.TryParse(txnRef.Split('_')[0], out int orderId))
             {
-                return new PaymentResultDTO
-                {
-                    Success = false,
-                    Message = "Invalid order id."
-                };
+                return new PaymentResultDTO { Success = false, Message = "Invalid transaction reference." };
             }
             var transactionId = vnPay.GetResponseData("vnp_TransactionNo");
             var responseCode = vnPay.GetResponseData("vnp_ResponseCode");
@@ -97,8 +108,19 @@ namespace LearnCSharp.Infrastructure.Services
                 return CreateIpnResponse("97", "Invalid signature");
             }
 
-            var order = await GetOrderAsync(vnPay);
+            string txnRef = vnPay.GetResponseData("vnp_TxnRef");
+            if (string.IsNullOrEmpty(txnRef) || !txnRef.Contains('_'))
+            {
+                return CreateIpnResponse("01", "Order not found (Invalid TxnRef format)");
+            }
 
+            var parts = txnRef.Split('_');
+            if (!int.TryParse(parts[0], out int orderId) || !int.TryParse(parts[1], out int paymentId))
+            {
+                return CreateIpnResponse("01", "Order not found (Parse error)");
+            }
+
+            var order = await _unitOfWork.Order.GetByIdIncludeAsync(a => a.Id == orderId, includes: a => a.Payments);
             if (order == null)
             {
                 return CreateIpnResponse("01", "Order not found");
@@ -109,12 +131,37 @@ namespace LearnCSharp.Infrastructure.Services
                 return CreateIpnResponse("04", "Invalid amount");
             }
 
-            if (order.PaymentStatus == SD.PaymentPaid)
+            if (order.Status == SD.Processing || order.Status == SD.PaymentPaid)
             {
                 return CreateIpnResponse("02", "Order already confirmed");
             }
 
-            await UpdateOrderAsync(vnPay, order);
+            var payment = order.Payments.FirstOrDefault(p => p.Id == paymentId);
+            var responseCode = vnPay.GetResponseData("vnp_ResponseCode");
+            var transactionStatus = vnPay.GetResponseData("vnp_TransactionStatus");
+            var transactionNo = vnPay.GetResponseData("vnp_TransactionNo");
+
+            if (payment != null)
+            {
+                payment.GatewayTransactionId = transactionNo;
+                payment.GatewayMetadata = JsonSerializer.Serialize(query); 
+                payment.PaymentDate = DateTime.UtcNow;
+
+                if (responseCode == "00" && transactionStatus == "00")
+                {
+                    payment.PaymentStatus = SD.PaymentPaid;
+                    order.Status = SD.Processing; 
+                }
+                else
+                {
+                    payment.PaymentStatus = SD.PaymentFailed;
+                }
+
+                _unitOfWork.Payment.Update(payment);
+            }
+
+            _unitOfWork.Order.Update(order);
+            await _unitOfWork.CompleteAsync();
 
             return CreateIpnResponse("00", "Confirm Success");
         }
@@ -142,15 +189,6 @@ namespace LearnCSharp.Infrastructure.Services
             return vnPay.ValidateSignature(secureHash, _vnPaySettings.HashSecret);
         }
 
-        private async Task<Order> GetOrderAsync(VnPayLibrary vnPay)
-        {
-            if (!int.TryParse(vnPay.GetResponseData("vnp_TxnRef"), out var orderId))
-            {
-                return null;
-            }
-            return await _unitOfWork.Order.GetByIdAsync(orderId);
-        }
-
         private bool ValidateAmount(VnPayLibrary vnPay, Order order)
         {
             if (!long.TryParse(vnPay.GetResponseData("vnp_Amount"),
@@ -161,29 +199,6 @@ namespace LearnCSharp.Infrastructure.Services
             var expectedAmount = Convert.ToInt64(order.TotalMoney * 100);
             return amount == expectedAmount;
         }
-
-        private async Task UpdateOrderAsync(VnPayLibrary vnPay, Order order)
-        {
-            var responseCode = vnPay.GetResponseData("vnp_ResponseCode");
-
-            var transactionStatus = vnPay.GetResponseData("vnp_TransactionStatus");
-
-            var transactionNo = vnPay.GetResponseData("vnp_TransactionNo");
-            order.PaymentTransactionId = transactionNo;
-
-            if (responseCode == "00" && transactionStatus == "00")
-            {
-                order.PaymentStatus = SD.PaymentPaid;
-                order.Status = SD.Processing;
-            }
-            else
-            {
-                order.PaymentStatus = SD.PaymentFailed;
-            }
-            _unitOfWork.Order.Update(order);
-            await _unitOfWork.CompleteAsync();
-        }
-
         private IpnResponseDTO CreateIpnResponse(string rspCode, string message)
         {
             return new IpnResponseDTO

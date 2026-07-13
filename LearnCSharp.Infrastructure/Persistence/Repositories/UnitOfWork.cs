@@ -21,6 +21,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             Size = new SizeRepository(context);
             Crust = new CrustRepository(context);
             ProductVariant = new ProductVariantRepository(context);
+            Payment = new PaymentRepository(context);
         }
 
         public ICategoryRepository Category { get; private set; }
@@ -32,6 +33,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
         public ISizeRepository  Size { get; private set; }
         public ICrustRepository Crust { get; private set; }
         public IProductVariantRepository ProductVariant { get; private set; }
+        public IPaymentRepository Payment { get; private set; }
 
         public async Task BeginTransactionAsync()
         {

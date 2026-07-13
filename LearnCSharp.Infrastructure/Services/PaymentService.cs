@@ -23,20 +23,33 @@ namespace LearnCSharp.Infrastructure.Services
 
         public async Task<PaymentIntentResultDTO> CreatePaymentIntentAsync(int orderId)
         {
-            var order = await _unitOfWork.Order.GetByIdAsync(orderId);
+            var order = await _unitOfWork.Order.GetByIdIncludeAsync(a => a.Id == orderId, includes: a => a.Payments);
             var paymentIntentService = new PaymentIntentService();
             if (order == null)
             {
                 throw new ApplicationException("Order not found");
             }
-            if (order.PaymentStatus == SD.PaymentPaid)
+            if (order.Status == SD.PaymentPaid)
             {
-                throw new ApplicationException("Order has already been paid.");
+                throw new ApplicationException("This order has already been paid and processed.");
             }
-
-            if (!string.IsNullOrEmpty(order.PaymentIntentId))
+            var payment = order.Payments.FirstOrDefault(a => a.PaymentMethod == SD.Stripe && a.PaymentStatus == SD.PaymentPending);
+            if (payment == null)
             {
-                var existingIntent =await paymentIntentService.GetAsync(order.PaymentIntentId);
+                payment = new Domain.Entities.Payment
+                {
+                    OrderId = order.Id,
+                    PaymentMethod = SD.Stripe,
+                    Amount = order.TotalMoney,
+                    PaymentStatus = SD.PaymentPending
+                };
+
+                await _unitOfWork.Payment.CreateAsync(payment);
+                await _unitOfWork.CompleteAsync();
+            }
+            if (!string.IsNullOrEmpty(payment.GatewayOrderId))
+            {
+                var existingIntent = await paymentIntentService.GetAsync(payment.GatewayOrderId);
 
                 switch (existingIntent.Status)
                 {
@@ -54,12 +67,12 @@ namespace LearnCSharp.Infrastructure.Services
                     case "processing":
                         throw new ApplicationException("Payment is processing.");
                     case "succeeded":
-                        order.PaymentStatus = SD.PaymentPaid;
-                        _unitOfWork.Order.Update(order);
+                        payment.PaymentStatus = SD.PaymentPaid;
+                        _unitOfWork.Payment.Update(payment);
                         await _unitOfWork.CompleteAsync();
                         throw new InvalidOperationException("Order has already been paid and settled.");
                     case "canceled":
-                        order.PaymentIntentId = null;
+                        payment.GatewayOrderId = null;
                         break;
                 }
             }
@@ -75,7 +88,8 @@ namespace LearnCSharp.Infrastructure.Services
                 Metadata = new Dictionary<string, string>
                 {
                     { SD.StripeMetadataKeysOrderId, order.Id.ToString() },
-                    { SD.StripeMetadataKeysUserId, order.UserId.ToString() }
+                    { SD.StripeMetadataKeysUserId, order.UserId.ToString() },
+                    { SD.StripeMetadataKeysPaymentId, payment.Id.ToString() },
                 },
             };
             var requestOptions = new RequestOptions
@@ -83,10 +97,11 @@ namespace LearnCSharp.Infrastructure.Services
                 IdempotencyKey = $"payment-{order.Id}"
             };
             var paymentIntent = await paymentIntentService.CreateAsync(options, requestOptions);
-            order.PaymentIntentId = paymentIntent.Id;
-            order.PaymentStatus = SD.PaymentPending;
-            order.Status = SD.PaymentPending;
+            payment.GatewayOrderId = paymentIntent.Id;
+            payment.PaymentStatus = SD.PaymentPending;
+            payment.GatewayMetadata = paymentIntent.RawJObject?.ToString();
             _unitOfWork.Order.Update(order);
+            _unitOfWork.Payment.Update(payment);
             await _unitOfWork.CompleteAsync();
             return new PaymentIntentResultDTO
             {
@@ -98,45 +113,68 @@ namespace LearnCSharp.Infrastructure.Services
 
         public async Task HandleWebhookAsync(string json, string stripeSignature)
         {
-            var stripeEvent = EventUtility.ConstructEvent(json,stripeSignature,_stripeSettings.WebhookSecret );
-            if (stripeEvent.Type == EventTypes.PaymentIntentSucceeded)
+            try
             {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                if (paymentIntent != null)
+                var stripeEvent = EventUtility.ConstructEvent(json, stripeSignature, _stripeSettings.WebhookSecret);
+
+                if (stripeEvent.Type == EventTypes.PaymentIntentSucceeded)
                 {
+                    var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                    if (paymentIntent == null) return;
                     paymentIntent.Metadata.TryGetValue(SD.StripeMetadataKeysOrderId, out var orderIdStr);
-                    int.TryParse(orderIdStr, out int orderId);
-                    var order = await _unitOfWork.Order.GetByIdAsync(orderId);
-                    if (order.PaymentStatus == SD.PaymentPaid)
+                    paymentIntent.Metadata.TryGetValue(SD.StripeMetadataKeysPaymentId, out var paymentIdStr);
+
+                    if (int.TryParse(orderIdStr, out int orderId) && int.TryParse(paymentIdStr, out int paymentId))
                     {
-                        return;
-                    }
-                    if (order != null)
-                    {
-                        order.PaymentStatus = SD.PaymentPaid;
-                        order.PaymentTransactionId = paymentIntent.Id;
-                        order.PaymentDate = DateTime.UtcNow;
+                        var order = await _unitOfWork.Order.GetByIdIncludeAsync(a => a.Id == orderId, includes: a => a.Payments);
+                        if (order == null) return;
+                        if (order.Status == SD.Processing || order.Status == SD.PaymentPaid)
+                        {
+                            return;
+                        }
+                        var payment = order.Payments.FirstOrDefault(p => p.Id == paymentId);
+                        if (payment != null)
+                        {
+                            payment.PaymentStatus = SD.PaymentPaid;
+                            payment.PaymentDate = DateTime.UtcNow;
+                            payment.GatewayTransactionId = paymentIntent.LatestChargeId;
+                            payment.GatewayMetadata = paymentIntent.RawJObject?.ToString();
+                            _unitOfWork.Payment.Update(payment);
+                        }
                         order.Status = SD.Processing;
                         _unitOfWork.Order.Update(order);
                         await _unitOfWork.CompleteAsync();
                     }
                 }
-            }
-            else if (stripeEvent.Type == EventTypes.PaymentIntentPaymentFailed)
-            {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                if (paymentIntent != null)
+                else if (stripeEvent.Type == EventTypes.PaymentIntentPaymentFailed)
                 {
+                    var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                    if (paymentIntent == null) return;
+
                     paymentIntent.Metadata.TryGetValue(SD.StripeMetadataKeysOrderId, out var orderIdStr);
-                    int.TryParse(orderIdStr, out int orderId);
-                    var order = await _unitOfWork.Order.GetByIdAsync(orderId);
-                    if (order != null)
+                    paymentIntent.Metadata.TryGetValue(SD.StripeMetadataKeysPaymentId, out var paymentIdStr);
+
+                    if (int.TryParse(orderIdStr, out int orderId) && int.TryParse(paymentIdStr, out int paymentId))
                     {
-                        order.PaymentStatus = SD.PaymentFailed;
-                        _unitOfWork.Order.Update(order);
+                        var order = await _unitOfWork.Order.GetByIdIncludeAsync(a => a.Id == orderId, includes: a => a.Payments);
+                        if (order == null) return;
+
+                        var payment = order.Payments.FirstOrDefault(p => p.Id == paymentId);
+                        if (payment != null)
+                        {
+                            payment.PaymentStatus = SD.PaymentFailed;
+                            payment.GatewayMetadata = paymentIntent.RawJObject?.ToString();
+
+                            _unitOfWork.Payment.Update(payment);
+                        }
+
                         await _unitOfWork.CompleteAsync();
                     }
                 }
+            }
+            catch (StripeException ex)
+            {
+                throw new ApplicationException("Webhook signature verification failed", ex);
             }
         }
     }

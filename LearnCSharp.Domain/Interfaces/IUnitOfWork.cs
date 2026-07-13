@@ -11,6 +11,7 @@
         ISizeRepository Size { get; }
         ICrustRepository Crust { get; }
         IProductVariantRepository ProductVariant { get; }
+        IPaymentRepository Payment { get; }
 
         Task<int> CompleteAsync();
 
