@@ -1,4 +1,5 @@
 ﻿using LearnCSharp.Application.Interfaces;
+using LearnCSharp.Application.Models;
 using LearnCSharp.Application.Models.DTOs.Order;
 using LearnCSharp.Application.Models.DTOs.Product;
 using Microsoft.AspNetCore.Authorization;
@@ -21,15 +22,8 @@ namespace LearnCSharp.API.Controllers
         [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDTO model)
         {
-            try
-            {
-                var orderId = await _orderService.CreateAsync(model);
-                return Ok(new { orderId });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var orderId = await _orderService.CreateAsync(model);
+            return Ok(new { orderId });
         }
 
         [HttpGet("get-all")]
@@ -39,10 +33,19 @@ namespace LearnCSharp.API.Controllers
             return Ok(data);
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id:int}")]
+        [Authorize]
         public async Task<ActionResult<ProductDTO>> GetByIdOrder(int id)
         {
             var data = await _orderService.GetOrderByIdAsync(id);
+            return Ok(data);
+        }
+
+        [HttpGet("get-order-by-user")]
+        [Authorize]
+        public async Task<ActionResult<PagedResult<OrderDTO>>> GetOrdersByUser(string? keyword, int pageIndex = 1, int pageSize = 10)
+        {
+            var data = await _orderService.GetOrdersByUserAsyncPagingAsync(keyword, pageIndex, pageSize);
             return Ok(data);
         }
 

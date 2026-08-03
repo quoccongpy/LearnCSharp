@@ -39,7 +39,7 @@ namespace LearnCSharp.Infrastructure.Services
             {
                 throw new ApplicationException("Order not found");
             }
-            if (order.Status == SD.PaymentPaid || order.Status == SD.Processing)
+            if (order.Status == SD.PaymentPaid || order.Status == SD.Confirmed)
             {
                 throw new ApplicationException("Order has already been paid.");
             }
@@ -134,7 +134,7 @@ namespace LearnCSharp.Infrastructure.Services
                 throw new ApplicationException("Associated order not found.");
             }
 
-            if (order.Status == SD.Processing || order.Status == SD.PaymentPaid)
+            if (order.Status == SD.Confirmed || order.Status == SD.PaymentPaid)
             {
                 return new PayPalCaptureResultDTO
                 {
@@ -185,7 +185,7 @@ namespace LearnCSharp.Infrastructure.Services
                 payment.PaymentStatus = SD.PaymentPaid;
                 payment.GatewayTransactionId = capture.Id;
                 payment.PaymentDate = DateTime.UtcNow;
-                order.Status = SD.Processing;
+                order.Status = SD.Pending;
 
                 _unitOfWork.Payment.Update(payment);
                 _unitOfWork.Order.Update(order);

@@ -128,7 +128,7 @@ namespace LearnCSharp.Infrastructure.Services
                     {
                         var order = await _unitOfWork.Order.GetByIdIncludeAsync(a => a.Id == orderId, includes: a => a.Payments);
                         if (order == null) return;
-                        if (order.Status == SD.Processing || order.Status == SD.PaymentPaid)
+                        if (order.Status == SD.Confirmed || order.Status == SD.PaymentPaid)
                         {
                             return;
                         }
@@ -141,7 +141,7 @@ namespace LearnCSharp.Infrastructure.Services
                             payment.GatewayMetadata = paymentIntent.RawJObject?.ToString();
                             _unitOfWork.Payment.Update(payment);
                         }
-                        order.Status = SD.Processing;
+                        order.Status = SD.Pending;
                         _unitOfWork.Order.Update(order);
                         await _unitOfWork.CompleteAsync();
                     }
