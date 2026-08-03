@@ -38,7 +38,6 @@ namespace LearnCSharp.Application.Services
                     Address = model.Address,
                     Note = model.Note,
                     OrderDate = DateTime.UtcNow,
-                    Status = SD.Pending,
                     ScheduledTime=model.ScheduledTime,
                     UserId = userId,
                 };
@@ -136,7 +135,7 @@ namespace LearnCSharp.Application.Services
         public async Task<PagedResult<OrderDTO>> GetAllOrderPagingAsync(string? keyword, string? status, int pageIndex = 1, int pageSize = 10)
         {
             Expression<Func<Order, bool>> filter = a => (string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword))
-                                                        && (!string.IsNullOrEmpty(keyword) || a.Status.Contains(status));
+                                                     && (!string.IsNullOrEmpty(keyword) || a.Status.Contains(status));
             var (order, totalCount) = await _unitOfWork.Order.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
             var data = order.Select(a => new OrderDTO
             {
@@ -165,6 +164,15 @@ namespace LearnCSharp.Application.Services
             var userId = _currentUserService.UserId;
             var user = await _userService.GetUserByIdAsync(userId);
             var order = await _unitOfWork.Order.GetByIdAsync(id);
+            if (order == null)
+            {
+                throw new ApplicationException("No find Order.");
+            }
+            if (order.UserId != userId && !await _userService.IsUserInRoleAsync(userId, SD.RoleAdmin))
+            {
+                throw new UnauthorizedAccessException("You do not have permission to view this order.");
+            }
+
 
             var data = new OrderDTO()
             {
@@ -183,14 +191,70 @@ namespace LearnCSharp.Application.Services
             return data;
         }
 
-        public Task<PagedResult<OrderDTO>> GetOrdersByStatusAsyncPagingAsync(string keyword, int pageIndex = 1, int pageSize = 10)
+        public async Task<PagedResult<OrderDTO>> GetOrdersByStatusAsyncPagingAsync(string keyword, int pageIndex = 1, int pageSize = 10)
         {
-            throw new NotImplementedException();
+            var userId = _currentUserService.UserId;
+            if (userId == Guid.Empty)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+            Expression<Func<Order, bool>> filter = a => a.UserId == userId && (string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword)
+                                                                                                             || a.FullName.Contains(keyword)
+                                                                                                             || a.Id.ToString() == keyword);
+            var (orders, totalCount) = await _unitOfWork.Order.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
+            var data = orders.Select(a => new OrderDTO
+            {
+                Id = a.Id,
+                Status = a.Status,
+                FullName = a.FullName,
+                PhoneNumber = a.PhoneNumber,
+                Address = a.Address,
+                Note = a.Note,
+                OrderDate = a.OrderDate,
+                TotalMoney = a.TotalMoney,
+            }).ToList();
+            var result = new PagedResult<OrderDTO>
+            {
+                Results = data,
+                CurrentPage = pageIndex,
+                RowCount = totalCount,
+                PageSize = pageSize
+            };
+            return result;
         }
 
-        public Task<PagedResult<OrderDTO>> GetOrdersByUserAsyncPagingAsync(string keyword, int pageIndex = 1, int pageSize = 10)
+        public async Task<PagedResult<OrderDTO>> GetOrdersByUserAsyncPagingAsync(string keyword, int pageIndex = 1, int pageSize = 10)
         {
-            throw new NotImplementedException();
+            var userId = _currentUserService.UserId;
+            if (userId == Guid.Empty)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
+            Expression<Func<Order, bool>> filter = a => a.UserId == userId && (string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword)
+                                                                                                             || a.FullName.Contains(keyword)
+                                                                                                             || a.Id.ToString() == keyword);
+            var (orders, totalCount) = await _unitOfWork.Order.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
+            var data = orders.Select(a => new OrderDTO
+            {
+                Id = a.Id,
+                Status = a.Status,
+                FullName = a.FullName,
+                PhoneNumber = a.PhoneNumber,
+                Address = a.Address,
+                Note = a.Note,
+                OrderDate = a.OrderDate,
+                TotalMoney = a.TotalMoney,
+            }).ToList();
+            var result = new PagedResult<OrderDTO>
+            {
+                Results = data,
+                CurrentPage = pageIndex,
+                RowCount = totalCount,
+                PageSize = pageSize
+            };
+            return result;
         }
 
         public Task UpdateAsync(int id, OrderUpdateDTO model)
@@ -200,29 +264,23 @@ namespace LearnCSharp.Application.Services
 
         private async Task<List<OrderDetailDTO>> GetOrderDetailsByOrderIdAsync(int orderId)
         {
-            var orderDetail = await _unitOfWork.OrderDetail.GetAllAsync(a => a.OrderId == orderId);
-
-            var productIds = orderDetail.Select(x => x.ProductId).Distinct().ToList();
-
-            var products = await _unitOfWork.Product.GetAllAsync(a => productIds.Contains(a.Id));
-
-            var productDict = products.ToDictionary(p => p.Id);
-
+            var orderDetails = await _unitOfWork.OrderDetail.GetAllAsync(a => a.OrderId == orderId);
             var data = new List<OrderDetailDTO>();
-            foreach (var item in orderDetail)
+            foreach (var item in orderDetails)
             {
-                if (productDict.TryGetValue(item.ProductId, out var product))
+                data.Add(new OrderDetailDTO()
                 {
-                    data.Add(new OrderDetailDTO()
-                    {
-                        Id = item.Id,
-                        //OrderId = item.OrderId,
-                        //ProductId = item.ProductId,
-                        Quantity = item.Quantity,
-                        Price = product.Price,
-                        ProductName = product.Name,
-                    });
-                }
+                    Id = item.Id,
+                    OrderId = item.OrderId,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    Price = item.UnitPrice, 
+                    ProductName = item.ProductName,
+                    SizeName = item.SizeName,
+                    CrustName = item.CrustName,
+                    Note = item.Note,
+                    ProductVariantId = item.ProductVariantId
+                });
             }
             return data;
         }

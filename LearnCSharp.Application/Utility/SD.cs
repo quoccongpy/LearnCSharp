@@ -11,11 +11,14 @@
 
         #region OrderStatus
 
-        public const string Pending = "Pending";
-        public const string Processing = "Processing";
-        public const string Shipped = "Shipped";
-        public const string Delivered = "Delivered";
-        public const string Cancelled = "Cancelled";
+        public const string Pending = "Pending";                       // Chờ cửa hàng xác nhận
+        public const string Confirmed = "Confirmed";                   // Cửa hàng đã xác nhận
+        public const string Preparing = "Preparing";                   // Đang chuẩn bị món
+        public const string ReadyForPickup = "ReadyForPickup";         // Đã chuẩn bị xong, chờ shipper
+        public const string Delivering = "Delivering";                 // Đang giao hàng
+        public const string Delivered = "Delivered";                   // Đã giao thành công
+        public const string Cancelled = "Cancelled";                   // Khách hủy
+        public const string Rejected = "Rejected";                     // Cửa hàng từ chối
 
         #endregion OrderStatus
 

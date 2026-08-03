@@ -28,8 +28,8 @@ namespace LearnCSharp.Infrastructure.Services
             {
                 throw new ApplicationException("Order not found.");
             }
-            if (order.Status == SD.PaymentPaid || order.Status == SD.Processing)
-            {
+            if (order.Status == SD.PaymentPaid || order.Status == SD.Confirmed)
+            {   
                 throw new ApplicationException("Order has already been paid.");
             }
             var payment = order.Payments.FirstOrDefault(p => p.PaymentMethod == SD.VNPay && p.PaymentStatus == SD.PaymentPending);
@@ -131,7 +131,7 @@ namespace LearnCSharp.Infrastructure.Services
                 return CreateIpnResponse("04", "Invalid amount");
             }
 
-            if (order.Status == SD.Processing || order.Status == SD.PaymentPaid)
+            if (order.Status == SD.Confirmed || order.Status == SD.PaymentPaid)
             {
                 return CreateIpnResponse("02", "Order already confirmed");
             }
@@ -150,7 +150,7 @@ namespace LearnCSharp.Infrastructure.Services
                 if (responseCode == "00" && transactionStatus == "00")
                 {
                     payment.PaymentStatus = SD.PaymentPaid;
-                    order.Status = SD.Processing; 
+                    order.Status = SD.Pending; 
                 }
                 else
                 {
