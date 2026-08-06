@@ -16,6 +16,7 @@ namespace LearnCSharp.Application.Interfaces
         Task<PagedResult<OrderDTO>> GetOrdersByUserAsyncPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10);
 
         Task<PagedResult<OrderDTO>> GetOrdersByStatusAsyncPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 10);
+        Task UpdateStatusAsync(int id, string status);
 
         Task DeleteAsync(int id);   
     }
