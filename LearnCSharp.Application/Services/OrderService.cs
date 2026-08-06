@@ -38,7 +38,7 @@ namespace LearnCSharp.Application.Services
                     Address = model.Address,
                     Note = model.Note,
                     OrderDate = DateTime.UtcNow,
-                    ScheduledTime=model.ScheduledTime,
+                    ScheduledTime = model.ScheduledTime,
                     UserId = userId,
                 };
                 decimal totalMoney = 0;
@@ -54,7 +54,7 @@ namespace LearnCSharp.Application.Services
                     decimal unitPrice = product.Price;
                     string sizeName = null;
                     string crustName = null;
-                    if(item.ProductVariantId.HasValue)
+                    if (item.ProductVariantId.HasValue)
                     {
                         var variant = await _unitOfWork.ProductVariant.GetByIdAsync(item.ProductVariantId.Value);
                         if (variant != null)
@@ -134,8 +134,8 @@ namespace LearnCSharp.Application.Services
 
         public async Task<PagedResult<OrderDTO>> GetAllOrderPagingAsync(string? keyword, string? status, int pageIndex = 1, int pageSize = 10)
         {
-            Expression<Func<Order, bool>> filter = a => (string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword))
-                                                     && (!string.IsNullOrEmpty(keyword) || a.Status.Contains(status));
+            Expression<Func<Order, bool>> filter = a =>(string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword) || a.FullName.Contains(keyword) || a.Id.ToString() == keyword)
+                                                   && (string.IsNullOrEmpty(status) || a.Status == status);
             var (order, totalCount) = await _unitOfWork.Order.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
             var data = order.Select(a => new OrderDTO
             {
@@ -172,7 +172,6 @@ namespace LearnCSharp.Application.Services
             {
                 throw new UnauthorizedAccessException("You do not have permission to view this order.");
             }
-
 
             var data = new OrderDTO()
             {
@@ -262,6 +261,29 @@ namespace LearnCSharp.Application.Services
             throw new NotImplementedException();
         }
 
+        public async Task UpdateStatusAsync(int id, string status)
+        {
+            try
+            {
+                var order = await _unitOfWork.Order.GetByIdAsync(id);
+                if (order == null)
+                {
+                    throw new KeyNotFoundException("Không tìm thấy đơn hàng.");
+                }
+                ValidateStatusTransition(order.Status, status);
+
+                await _unitOfWork.BeginTransactionAsync();
+                order.Status = status;
+                _unitOfWork.Order.Update(order);
+                await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private async Task<List<OrderDetailDTO>> GetOrderDetailsByOrderIdAsync(int orderId)
         {
             var orderDetails = await _unitOfWork.OrderDetail.GetAllAsync(a => a.OrderId == orderId);
@@ -274,7 +296,7 @@ namespace LearnCSharp.Application.Services
                     OrderId = item.OrderId,
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
-                    Price = item.UnitPrice, 
+                    Price = item.UnitPrice,
                     ProductName = item.ProductName,
                     SizeName = item.SizeName,
                     CrustName = item.CrustName,
@@ -283,6 +305,33 @@ namespace LearnCSharp.Application.Services
                 });
             }
             return data;
+        }
+
+        private static void ValidateStatusTransition(string currentStatus, string newStatus)
+        {
+            var validTransitions = new Dictionary<string, string[]>
+            {
+                {
+                    SD.Pending, new[]{SD.Confirmed,SD.Cancelled,SD.Rejected}
+                },
+                {
+                    SD.Confirmed,new[]{SD.Preparing,SD.Cancelled}
+                },
+                {
+                    SD.Preparing,new[]{SD.ReadyForPickup,SD.Cancelled}
+                },
+                {
+                    SD.ReadyForPickup, new[]{SD.Delivering}
+                },
+                { SD.Delivering, new[]{SD.Delivered}
+                }
+            };
+            if (!validTransitions.TryGetValue(currentStatus, out var nextStatuses) ||
+                !nextStatuses.Contains(newStatus))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot change status from '{currentStatus}' to '{newStatus}'.");
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models;
 using LearnCSharp.Application.Models.DTOs.Order;
-using LearnCSharp.Application.Models.DTOs.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,7 +34,7 @@ namespace LearnCSharp.API.Controllers
 
         [HttpGet("{id:int}")]
         [Authorize]
-        public async Task<ActionResult<ProductDTO>> GetByIdOrder(int id)
+        public async Task<ActionResult<OrderDTO>> GetByIdOrder(int id)
         {
             var data = await _orderService.GetOrderByIdAsync(id);
             return Ok(data);
@@ -61,6 +60,14 @@ namespace LearnCSharp.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPut("{id:int}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] OrderStatusDTO model)
+        {
+            await _orderService.UpdateStatusAsync(id, model.Status);
+            return Ok();
         }
     }
 }
