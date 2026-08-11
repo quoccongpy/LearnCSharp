@@ -1,5 +1,6 @@
 ﻿using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Application.Models;
+using LearnCSharp.Application.Models.DTOs.Notification;
 using LearnCSharp.Application.Models.DTOs.Order;
 using LearnCSharp.Application.Utility;
 using LearnCSharp.Domain.Entities;
@@ -13,12 +14,16 @@ namespace LearnCSharp.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IRealtimeNotificationService _realtimeNotification;
+        private readonly INotificationService _notificationService;
 
-        public OrderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IUserService userService)
+        public OrderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IUserService userService, IRealtimeNotificationService realtimeNotification, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _userService = userService;
+            _realtimeNotification = realtimeNotification;
+            _notificationService = notificationService;
         }
 
         public async Task<int> CreateAsync(OrderCreateDTO model)
@@ -277,6 +282,15 @@ namespace LearnCSharp.Application.Services
                 _unitOfWork.Order.Update(order);
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
+                var notification = new NotificationDTO
+                {
+                    Title = GetNotificationTitle(status),
+                    Message = $"Đơn hàng #{id} của bạn {GetNotificationMessage(status)}",
+                    Type = (status == "Cancelled" || status == "Rejected") ? "error" : "success",
+                    OrderId = id,
+                };
+                await _notificationService.CreateAsync(order.UserId, notification);
+                await _realtimeNotification.PushToUserAsync(order.UserId, notification);
             }
             catch (Exception)
             {
@@ -333,5 +347,28 @@ namespace LearnCSharp.Application.Services
                     $"Cannot change status from '{currentStatus}' to '{newStatus}'.");
             }
         }
+
+        private string GetNotificationTitle(string status) => status switch
+        {
+            "Confirmed" => "✅ Đơn hàng được xác nhận",
+            "Preparing" => "👨‍🍳 Đang chuẩn bị",
+            "ReadyForPickup" => "📦 Sẵn sàng giao",
+            "Delivering" => "🛵 Đang giao hàng",
+            "Delivered" => "🎉 Giao hàng thành công",
+            "Cancelled" => "❌ Đơn hàng đã hủy",
+            "Rejected" => "⛔ Đơn hàng bị từ chối",
+            _ => "Cập nhật đơn hàng"
+        };
+        private string GetNotificationMessage(string status) => status switch
+        {
+            "Confirmed" => "đã được xác nhận và sẽ sớm được chuẩn bị.",
+            "Preparing" => "đang được chuẩn bị.",
+            "ReadyForPickup" => "đã sẵn sàng và đang chờ giao.",
+            "Delivering" => "đang trên đường giao đến bạn.",
+            "Delivered" => "đã được giao thành công!",
+            "Cancelled" => "đã bị hủy.",
+            "Rejected" => "đã bị từ chối.",
+            _ => "đã được cập nhật."
+        };
     }
 }

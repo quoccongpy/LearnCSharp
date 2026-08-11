@@ -1,5 +1,8 @@
 using LearnCSharp.API;
 using LearnCSharp.API.Extensions;
+using LearnCSharp.API.Hubs;
+using LearnCSharp.API.Services;
+using LearnCSharp.Application.Interfaces;
 using LearnCSharp.Infrastructure;
 using LearnCSharp.Infrastructure.Identity;
 using LearnCSharp.Infrastructure.Persistence.ConfigOptions;
@@ -92,6 +95,17 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = tokenValidationParameters;
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
         OnAuthenticationFailed = context =>
         {
             if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
@@ -138,7 +152,8 @@ builder.Services.AddSwaggerGen(c =>
         { jwtSecurityScheme, Array.Empty<string>() }
     });
 });
-
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealtimeNotificationService, SignalRNotificationService>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -159,6 +174,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHub<NotificationHub>("/hubs/notification").RequireCors(LearnCSharpCorsPolicy);
 
 app.MapControllers();
 
