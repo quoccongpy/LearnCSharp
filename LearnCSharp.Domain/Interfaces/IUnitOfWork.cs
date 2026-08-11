@@ -12,6 +12,7 @@
         ICrustRepository Crust { get; }
         IProductVariantRepository ProductVariant { get; }
         IPaymentRepository Payment { get; }
+        INotificationRepository Notification { get; }
 
         Task<int> CompleteAsync();
 
