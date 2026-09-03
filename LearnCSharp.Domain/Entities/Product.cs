@@ -13,5 +13,6 @@
         public Category Category { get; set; }
         public ICollection<OrderDetails> OrderDetails { get; set; }
         public ICollection<ProductVariant> ProductVariants { get; set; }
+        public ICollection<ProductReview> Reviews { get; set; }
     }
 }

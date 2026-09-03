@@ -23,6 +23,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
             ProductVariant = new ProductVariantRepository(context);
             Payment = new PaymentRepository(context);
             Notification = new NotificationRepository(context);
+            ProductReview = new ProductReviewRepository(context);
         }
 
         public ICategoryRepository Category { get; private set; }
@@ -36,6 +37,7 @@ namespace LearnCSharp.Infrastructure.Persistence.Repositories
         public IProductVariantRepository ProductVariant { get; private set; }
         public IPaymentRepository Payment { get; private set; }
         public INotificationRepository Notification { get; private set; }
+        public IProductReviewRepository ProductReview { get; private set; }
 
         public async Task BeginTransactionAsync()
         {
