@@ -24,6 +24,7 @@ namespace LearnCSharp.Infrastructure
         public DbSet<ProductVariant> ProductVariant { get; set; }
         public DbSet<Payment> Payment { get; set; }
         public DbSet<Notification> Notification { get; set; }
+        public DbSet<ProductReview> ProductReview { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -47,6 +48,7 @@ namespace LearnCSharp.Infrastructure
             builder.ApplyConfiguration(new CrustConfiguration());
             builder.ApplyConfiguration(new ProductVariantConfiguration());
             builder.ApplyConfiguration(new NotificationConfiguration());
+            builder.ApplyConfiguration(new ProductReviewConfiguration());
 
             base.OnModelCreating(builder);
         }

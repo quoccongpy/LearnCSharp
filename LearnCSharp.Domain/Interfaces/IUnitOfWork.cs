@@ -13,6 +13,7 @@
         IProductVariantRepository ProductVariant { get; }
         IPaymentRepository Payment { get; }
         INotificationRepository Notification { get; }
+        IProductReviewRepository ProductReview { get; }
 
         Task<int> CompleteAsync();
 

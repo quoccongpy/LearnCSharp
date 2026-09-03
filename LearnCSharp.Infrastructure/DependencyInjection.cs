@@ -30,6 +30,7 @@ namespace LearnCSharp.Infrastructure
             services.AddScoped<IVnPayService, VnPayService>();
             services.AddScoped<IPayPalService, PayPalService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IProductReviewService, ProductReviewService>();
             return services;
         }
     }
