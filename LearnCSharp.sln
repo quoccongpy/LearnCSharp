@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LearnCSharp.Infrastructure"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LearnCSharp.Application", "LearnCSharp.Application\LearnCSharp.Application.csproj", "{6DD8A48C-6BEA-4E84-AD7B-80AAF7C97F1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LearnCSharp.Domain", "LearnCSharp.Domain\LearnCSharp.Domain.csproj", "{6DC1AC10-8092-49D1-BF51-04BFAE59CEA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LearnCSharp.Domain", "LearnCSharp.Domain\LearnCSharp.Domain.csproj", "{6DC1AC10-8092-49D1-BF51-04BFAE59CEA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LearnCSharp.API", "LearnCSharp.API\LearnCSharp.API.csproj", "{96A7B027-7BC1-4410-A204-3A620707ABB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LearnCSharp.API", "LearnCSharp.API\LearnCSharp.API.csproj", "{96A7B027-7BC1-4410-A204-3A620707ABB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LearnCSharp.Tests", "LearnCSharp.Tests\LearnCSharp.Tests.csproj", "{F85B1F65-B414-43B5-A7F2-C497AD974EFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{96A7B027-7BC1-4410-A204-3A620707ABB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96A7B027-7BC1-4410-A204-3A620707ABB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96A7B027-7BC1-4410-A204-3A620707ABB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F85B1F65-B414-43B5-A7F2-C497AD974EFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F85B1F65-B414-43B5-A7F2-C497AD974EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F85B1F65-B414-43B5-A7F2-C497AD974EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F85B1F65-B414-43B5-A7F2-C497AD974EFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
