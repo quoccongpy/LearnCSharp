@@ -8,12 +8,10 @@ namespace LearnCSharp.Application.Services
     public class SizeService : ISizeService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IRedisCacheService _redisCacheService;
 
-        public SizeService(IUnitOfWork unitOfWork, IRedisCacheService redisCacheService)
+        public SizeService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _redisCacheService = redisCacheService;
         }
 
         public async Task CreateAsync(SizeDTO model)
