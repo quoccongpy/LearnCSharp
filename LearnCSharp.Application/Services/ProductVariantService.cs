@@ -9,12 +9,10 @@ namespace LearnCSharp.Application.Services
     public class ProductVariantService : IProductVariantService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IRedisCacheService _redisCacheService;
 
-        public ProductVariantService(IUnitOfWork unitOfWork, IRedisCacheService redisCacheService)
+        public ProductVariantService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _redisCacheService = redisCacheService;
         }
 
         public async Task CreateAsync(ProductVariantCreateDTO model)
@@ -74,9 +72,9 @@ namespace LearnCSharp.Application.Services
                 SizeName = pv.Size.Name,
                 CrustName = pv.Crust.Name,
                 Price = pv.Price,
-                SizeId= pv.SizeId,
-                CrustId= pv.CrustId,
-            }).OrderByDescending(a=>a.Id).ToList();
+                SizeId = pv.SizeId,
+                CrustId = pv.CrustId,
+            }).OrderByDescending(a => a.Id).ToList();
         }
 
         public async Task<List<ProductSimpleDTO>> GetProductsWithVariantAsync()
