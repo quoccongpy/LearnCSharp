@@ -47,7 +47,7 @@ var redisConnection = cacheConfig["RedisConnection"];
 builder.Services.AddSingleton<IConnectionMultiplexer>(
     ConnectionMultiplexer.Connect(redisConnection));
 
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 Stripe.StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 builder.Services.Configure<VnPaySettings>(builder.Configuration.GetSection("VNPaySettings"));
