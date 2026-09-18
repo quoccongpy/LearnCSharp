@@ -1,4 +1,5 @@
 ﻿using LearnCSharp.Application.Interfaces;
+using LearnCSharp.Application.Messages.Events;
 using LearnCSharp.Application.Models;
 using LearnCSharp.Application.Models.DTOs.Notification;
 using LearnCSharp.Application.Models.DTOs.Order;
@@ -14,16 +15,14 @@ namespace LearnCSharp.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IRealtimeNotificationService _realtimeNotification;
-        private readonly INotificationService _notificationService;
+        private readonly IEventPublisher _eventPublisher;
 
-        public OrderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IUserService userService, IRealtimeNotificationService realtimeNotification, INotificationService notificationService)
+        public OrderService(IUnitOfWork unitOfWork, ICurrentUserService currentUserService, IUserService userService,IEventPublisher eventPublisher)
         {
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _userService = userService;
-            _realtimeNotification = realtimeNotification;
-            _notificationService = notificationService;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task<int> CreateAsync(OrderCreateDTO model)
@@ -98,6 +97,15 @@ namespace LearnCSharp.Application.Services
                 }
                 await _unitOfWork.CompleteAsync();
                 await _unitOfWork.CommitTransactionAsync();
+
+                var orderCreatedEvent = new OrderCreatedEvent( OrderId: order.Id, 
+                                                               UserId: userId,
+                                                               FullName: model.FullName,
+                                                               Email: model.Email,
+                                                               TotalMoney: order.TotalMoney,
+                                                               OrderDate: order.OrderDate ?? DateTime.UtcNow
+                                                              );
+                await _eventPublisher.PublishAsync(orderCreatedEvent);
                 return order.Id;
             }
             catch
@@ -139,7 +147,7 @@ namespace LearnCSharp.Application.Services
 
         public async Task<PagedResult<OrderDTO>> GetAllOrderPagingAsync(string? keyword, string? status, int pageIndex = 1, int pageSize = 10)
         {
-            Expression<Func<Order, bool>> filter = a =>(string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword) || a.FullName.Contains(keyword) || a.Id.ToString() == keyword)
+            Expression<Func<Order, bool>> filter = a => (string.IsNullOrEmpty(keyword) || a.PhoneNumber.Contains(keyword) || a.FullName.Contains(keyword) || a.Id.ToString() == keyword)
                                                    && (string.IsNullOrEmpty(status) || a.Status == status);
             var (order, totalCount) = await _unitOfWork.Order.GetPagedAsync(filter, ((pageIndex - 1) * pageSize), pageSize);
             var data = order.Select(a => new OrderDTO
@@ -278,6 +286,7 @@ namespace LearnCSharp.Application.Services
                 ValidateStatusTransition(order.Status, status);
 
                 await _unitOfWork.BeginTransactionAsync();
+                var oldStatus = order.Status;
                 order.Status = status;
                 _unitOfWork.Order.Update(order);
                 await _unitOfWork.CompleteAsync();
@@ -289,8 +298,16 @@ namespace LearnCSharp.Application.Services
                     Type = (status == "Cancelled" || status == "Rejected") ? "error" : "success",
                     OrderId = id,
                 };
-                await _notificationService.CreateAsync(order.UserId, notification);
-                await _realtimeNotification.PushToUserAsync(order.UserId, notification);
+
+                var orderStatusChangedEvent = new OrderStatusChangedEvent ( OrderId: id, 
+                                                                            UserId: order.UserId, 
+                                                                            OldStatus: oldStatus, 
+                                                                            NewStatus: status, 
+                                                                            NotificationTitle: GetNotificationTitle(status), 
+                                                                            NotificationMessage: $"Đơn hàng #{id} của bạn {GetNotificationMessage(status)}", 
+                                                                            NotificationType: (status == "Cancelled" || status == "Rejected") ? "error" : "success" );
+
+                await _eventPublisher.PublishAsync(orderStatusChangedEvent);
             }
             catch (Exception)
             {
@@ -359,6 +376,7 @@ namespace LearnCSharp.Application.Services
             "Rejected" => "⛔ Đơn hàng bị từ chối",
             _ => "Cập nhật đơn hàng"
         };
+
         private string GetNotificationMessage(string status) => status switch
         {
             "Confirmed" => "đã được xác nhận và sẽ sớm được chuẩn bị.",
