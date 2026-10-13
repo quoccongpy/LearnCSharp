@@ -51,7 +51,11 @@ namespace LearnCSharp.Infrastructure
                     });
                     cfg.ConfigureEndpoints(ctx);
                 });
+                x.AddConsumer<EmailNotificationConsumer>();
             });
+
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
     }
